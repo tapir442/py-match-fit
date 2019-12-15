@@ -30,7 +30,6 @@ class MyTableWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.layout    = QVBoxLayout()
-
         self.tabs      = QTabWidget ()
         self.tabs.resize (800, 600)        
         self._tabs = []        
@@ -160,11 +159,3 @@ if __name__ == "__main__":
     widget.show()
     sys.exit(app.exec_())
 		
-def main():
-   app = QApplication(sys.argv)
-   ex = tabdemo()
-   ex.show()
-   sys.exit(app.exec_())
-	
-if __name__ == '__main__':
-   main()

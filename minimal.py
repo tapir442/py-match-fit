@@ -1,3 +1,103 @@
+import sys
+
+import random
+
+
+import sys
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget,QVBoxLayout, QTableWidget, QLabel,  QTableWidgetItem, QComboBox, QTableView, QTableWidget, QInputDialog
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QSize, Qt, QEvent, QObject
+
+
+class ClickableQTabWidget(QTabWidget):
+    clicked = pyqtSignal()
+    def mousePressEvent(self, event):
+        self.clicked.emit()    
+
+
+class textView(QWidget):
+    def __init__(self, tabs):
+        super(textView, self).__init__()
+        self.theWindow = QWidget ()
+        self.tabs = tabs
+
+        teams = []
+        for idx in range (int(sys.argv[1])) :
+            teams.append (self.tabs.tabBar().tabText (idx))
+        
+        no_teams        = int(sys.argv[1])
+        games_per_round = int(no_teams//2)
+        no_rounds       = no_teams if no_teams % 2 == 1 else no_teams - 1
+        self.t = t = QTableWidget (games_per_round * no_rounds, 3, self.theWindow)
+        self.theWindow.layout=QVBoxLayout (self)
+        self.theWindow.layout.addWidget (t)
+        import datetime
+        start_time      = 8
+        start           = datetime.time (start_time)
+        start           = datetime.datetime(2000, 1, 1, 8, 0, 0)
+        len_of_game     = 12
+        len_of_break    = 3
+        duration        = datetime.timedelta (hours = 0, minutes = len_of_game + len_of_break)
+        self._cb_table  = []
+        for i in range (games_per_round * no_rounds) :
+            t.setItem(i, 0, QTableWidgetItem (start.strftime ("%H:%M")))
+            start = start + duration
+            cb1  = QComboBox()
+            for team in teams :
+                cb1.addItem (team, team)
+
+            cb2 = QComboBox()
+            for team in teams :
+                cb2.addItem (team, team)                
+
+
+            self._cb_table.append ((cb1, cb2))
+            
+            
+            t.setCellWidget (i, 1,   cb1)
+            t.setCellWidget (i, 2,   cb2)
+
+        self.close_button = QPushButton ("Close and validate")
+        self.theWindow.layout.addWidget (self.close_button)
+        self.close_button.clicked.connect(self.validate)
+
+    def validate (self) :
+        valtable = {"A-TEAM" : set (),
+                    "B-TEAM" : set (),
+                    "C-TEAM" : set (),
+                    "D-TEAM" : set (),
+                    "E-TEAM" : set (),
+                    }
+        for e in self._cb_table :
+            valtable [e [0].currentText()].add (e[1].currentText ())
+            valtable [e [1].currentText()].add (e[0].currentText ())
+            
+        # validation step
+        all_teams = set (valtable.keys ())
+        for team, opponents in valtable.items () :
+            print (team, opponents)
+            valid = all_teams - opponents == set ([team])
+            if not valid :
+                print ("%s has a problem: (%s)" % (team, opponents))
+
+        
+        
+class MatchView (QWidget) :
+    def __init__ (self)  :
+        super(MatchView, self).__init__()
+        self.theWindow = QWidget ()  
+        t = QTableWidget (12, 6, self.theWindow)
+        self.theWindow.layout=QVBoxLayout (self)
+        self.theWindow.layout.addWidget (t)
+
+    def handleEvents (self, event) :
+        print (event)
+
+    def event (self, event):
+        print (event)
+
+
 class Team (object) :
     pool = {}
     def __init__ (self, name) :
@@ -28,6 +128,86 @@ class Team (object) :
     def goals (self) :
         return sum ([self._players[p][2] for p in self._players])
 # end class Team
+
+
+class MyTableWidget(QWidget):        
+    def __init__(self):
+        QWidget.__init__(self)
+        self.layout    = QVBoxLayout()
+        self.tabs      = ClickableQTabWidget ()
+        self.tabs.resize (800, 600)        
+        self._tabs = []        
+        for i in range (int(sys.argv [1])) :
+            w     = QWidget()
+            table = QTableWidget(20, 3, w)
+            self._tabs.append (table)            
+            table.setHorizontalHeaderLabels(["Vorname", "Name", "Tore"])            
+            table.horizontalHeaderItem(0).setTextAlignment(Qt.AlignLeft)
+            table.horizontalHeaderItem(1).setTextAlignment(Qt.AlignHCenter)
+            table.horizontalHeaderItem(2).setTextAlignment(Qt.AlignRight) 
+            self.tabs.addTab (w, "Team %s" % (i+1))
+            w.layout = QVBoxLayout(self)
+            w.layout.addWidget (table)
+            w.setLayout (w.layout)            
+        self.layout.addWidget (self.tabs)
+        self.setLayout(self.layout)        
+
+        schedule_button = QPushButton ("Create Schedule")
+        self.layout.addWidget (schedule_button)
+        schedule_button.clicked.connect(self.clickSchedule)
+
+        match_button = QPushButton ("Start Match")
+        self.layout.addWidget (match_button)
+        match_button.clicked.connect(self.clickMatch)
+
+        self.blitztabelle = QTableWidget (self)
+        self.layout.addWidget (self.blitztabelle)
+        self.blitztabelle.setRowCount(int(sys.argv[1]))
+        self.blitztabelle.setColumnCount(8)
+        
+        self.blitztabelle.setHorizontalHeaderLabels(["team", "Spiele", "Siege",
+                                                                  "Unentschieden", "Niederlagen"
+                                                                  ,"Tore", "Differenz", "Punkte"]
+                                                   )
+        
+        self.torschuetzen = QTableWidget (self)
+        self.layout.addWidget (self.torschuetzen)
+        self.installEventFilter(self)
+
+        self.tabs.clicked.connect(self.onClicked)
+
+    def onClicked(self):
+        from pprint import pprint
+        pprint (dir(self.tabs.tabBar()))
+        idx        = self.tabs.tabBar().currentIndex()
+        dialog     = QInputDialog()
+        result, ok = dialog.getText(self, 'Text Input Dialog', 'Enter your name:')
+        if ok :
+            self.tabs.tabBar().setTabText (idx, result)
+
+        
+    def eventFilter(self, source, event):
+        if event.type() == QEvent.MouseButtonPress:
+            if event.button() == Qt.RightButton:
+                print("Right button clicked")
+        return False        
+
+    def change_name_of_team(self) :
+        pass
+
+    @pyqtSlot()
+    def on_doubleclick(self):
+        print("A"*99)        
+        for currentQTableWidgetItem in self.tableWidget.selectedItems():
+            print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())        
+    def clickSchedule (self, *args, **kw) :
+        self.t = textView (self.tabs)
+        self.t.show ()
+        
+    def clickMatch (self, *args, **kw) :
+        self.m = MatchView ()
+        self.m.show ()
+
 
 from enum import Enum, auto
 class Match_State (Enum):
@@ -88,7 +268,7 @@ class Model(object):
                               , Match (self.teams ["Austria"], self.teams ["Bayern"])
                               , Match (self.teams ["Rapid"], self.teams ["Ajax"])
                               , Match (self.teams ["Austria"], self.teams ["Ajax"])
-                              , Match (self.teams ["Rapid"], self.teams ["Bayern"])                                
+                              , Match (self.teams ["Rapid"], self.teams ["Bayern"])  
            ]
 
     def start_match (self) :
@@ -152,20 +332,31 @@ class Model(object):
         for team in self.teams :
             for player in self.teams[team]._players :
                 _player = self.teams[team]._players [player]
-                scorers.append ((_player [2], _player [0], _player [1], team))
+                scorers.append ((_player [2], _playeter [0], _player [1], team))
         scorers.sort (reverse = True)
         return [x for x in scorers if x [0] > 0]
 
-class GUI(object):
+class GUI(QMainWindow):
     def __init__(self):
-        pass
+        super().__init__()
+        self.title = 'PyQt5 tabs - pythonspot.com'
+        self.left = 0
+        self.top = 0
+        self.width  = 1020
+        self.height = 920
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
 
-    def show(self, data):
-        from pprint import pprint
-        for x in data.table  ():
-            pprint (x)
-        for x in data.scorer ():
-            pprint (x)
+        self.table_widget = MyTableWidget()
+        self.setCentralWidget(self.table_widget)
+        self.show ()
+        
+#    def show(self):
+#        from pprint import pprint
+#        for x in data.table  ():
+#            self.table_widget.torschuetzen = QTableWidget (10, 4, self)                
+#        for x in data.scorer ():
+#            pass
 
 class Controller(object):
     def __init__(self, model, view):
@@ -174,13 +365,15 @@ class Controller(object):
         self.model.register_observer(self)
 
     def update(self):
+        print ("A"*99)
         self.view.show(self.model)
 
-
-
-model = Model()
-gui = GUI()
-ctrl = Controller(model, gui)
+if __name__ == "__main__" :
+    model = Model()
+    app = QApplication(sys.argv)    
+    gui = GUI()
+    ctrl = Controller(model, gui)
+    sys.exit(app.exec_())
 
 model.init_team ("Rapid")
 model.add_player ("Rapid", 1, "Funki", "Feurer")
