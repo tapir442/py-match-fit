@@ -95,6 +95,7 @@ class Model(object):
         self._running += 1
         self.schedule_table [self._running].start ()
         self.notify ()
+        
     def close_match (self) :
         self.schedule_table [self._running].close ()
         
@@ -124,12 +125,10 @@ class Model(object):
                 teams[i._teams [0]._name] = [0, 0, 0]
             if i._teams [1]._name not in teams :
                 teams[i._teams [1]._name] = [0, 0, 0]
-            print (i._teams [0]._name, i._teams [1]._name)                
             if i._state == Match_State.waiting :
                 continue
 
             if i.draw ():
-                print ("A"*99)
                 teams[i._teams [0]._name][points_idx] += 1
                 teams[i._teams [1]._name][points_idx] += 1
                 teams[i._teams [0]._name][shot_idx]   += i._teams [2]
@@ -137,7 +136,6 @@ class Model(object):
                 teams[i._teams [0]._name][got_idx]    += i._teams [3]
                 teams[i._teams [1]._name][got_idx]    += i._teams [3]
             else :
-                print ("B"*99)                
                 winner = i.winner ()
                 loser  = i.loser ()
                 teams[winner[0]._name][points_idx] += 3
