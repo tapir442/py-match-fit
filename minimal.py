@@ -207,7 +207,6 @@ class MyTableWidget(QWidget):
         self.start           = datetime.datetime(2000, 1, 1, self.start_time, 0, 0)
         self.duration        = datetime.timedelta (hours = 0, minutes = self.len_of_game + self.len_of_break)
         self.t = textView (self)
-        from pprint import pprint
 
         self.installEventFilter(self)
         self.tabs.clicked.connect(self.onClicked)
@@ -311,7 +310,6 @@ class MatchManager (QWidget) :
             self.request.emit(row, column)
         self.team1 = team1 = model.schedule_table [idx].home ()
         self.team2 = team2 = model.schedule_table [idx].guest()
-        print (team1, team2)
         team1_index = [index for index in range(self.tabs.count())
                 if team1._name == self.tabs.tabText(index)][0]
         team2_index = [index for index in range(self.tabs.count())
@@ -365,7 +363,6 @@ class MatchManager (QWidget) :
                 self.mtable.setItem(i, 3, QTableWidgetItem (""))
                 self.mtable.setItem(i, 4, QTableWidgetItem (""))
                 self.mtable.setItem(i, 5, QTableWidgetItem (""))
-        print (self.mtable)
 
 
         header = self.mtable.horizontalHeader ()
@@ -465,7 +462,6 @@ class Controller(object):
     # end def validate
 
     def stop_match (self, *args, **kw) :
-        print ("Stop :", args, kw)
         v = QMessageBox.question( self.view.table_widget.match
                                   , "Schluuspfiff ","Do ya realy wanna quit ?"
                                 , QMessageBox.Yes | QMessageBox.No, QMessageBox.No
@@ -499,17 +495,14 @@ class Controller(object):
             e2 = tab.item (i, 1).text () if tab.item (i, 1) else ""
             if not (e1 or e2) :
                 continue
-            print (e1, e2)
             self.model.add_player (team, i + 1, e1, e2)
 
 #    @pyqtSlot (int, int)
     def goal(self, row, column) :
 #        if not self.view.table_widget.match.stopbutton.isChecked () :
 #            return
-        print (row, column)
         player_number, column = (row + 1, column)
         item = self.view.table_widget.match.mtable.rowAt (row)
-        print ("Player number: ", player_number, "Column: ", column)
 
         if column in (0,1) :
             team = self.model.schedule_table [self.model.running()].home()
@@ -517,12 +510,11 @@ class Controller(object):
             team = self.model.schedule_table [self.model.running()].guest()
         else :
             return
-        print ("Team:::::", team)
         if column in (0,5) :
-            print ("Cancel ", team._name, player_number)
+#            print ("Cancel ", team._name, player_number)
             self.model.cancel_goal (team._name, player_number)
         else :
-            print ("Goal ", team._name, player_number)            
+#            print ("Goal ", team._name, player_number)            
             self.model.goal (team._name, player_number)
         self.view.table_widget.blitztabelle.update (self.model, 0)
         self.view.table_widget.torschuetzen.update (self.model, 0)
