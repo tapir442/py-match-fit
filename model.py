@@ -27,7 +27,6 @@ class Match (object) :
             self._teams [2] += 1
         else :
             self._teams [3] += 1
-        print ("======>", team, number)
         Team.pool [team].goal (number)
 
     def draw (self) :
@@ -47,6 +46,12 @@ class Match (object) :
 
     def __str__ (self) :
         return self._teams [0]._name +" "+ self._teams [1]._name
+
+    def goals_home (self) :
+        return self._teams [2]
+
+    def goals_guest (self) :
+        return self._teams [3]
 
 class Team (object) :
     pool = {}
@@ -69,14 +74,19 @@ class Team (object) :
             pass
 
     def goal (self, number) :
-        from pprint import pprint
-        pprint (self.pool [self._name]._players) 
-        self.pool [self._name]._players [number][2] += 1
+        try :
+            self.pool [self._name]._players [number][2] += 1
+        except KeyError :
+            print ("Scheisse", self._name, number)
 
     def cancel_goal (self, number) :
-        if self._players [number][2] > 0 :
-            self._players [number][2] -= 1
-
+        try :
+            if self.pool [self._name]._players [number][2] > 0 :
+                self.pool [self._name]._players [number][2] -= 1
+        except KeyError:
+            print ("Scheisse", self._name, number)
+            pass
+        
     def goals (self) :
         return sum ([self._players[p][2] for p in self._players])
 
@@ -128,35 +138,49 @@ class Model(object):
 
     def table (self) :
         result     = []
-        shot_idx   = 0
-        got_idx    = 1
-        points_idx = 2
+        no_games_idx  = 0
+        victories_idx = 1
+        draw_idx      = 2
+        lost_idx      = 3
+        shot_idx      = 4
+        got_idx       = 5
+        diff_idx      = 6
+        points_idx    = 7
         teams      = {}
-        for i in self.schedule_table :
-            if i._teams [0]._name not in teams :
-                teams[i._teams [0]._name] = [0, 0, 0]
-            if i._teams [1]._name not in teams :
-                teams[i._teams [1]._name] = [0, 0, 0]
-            if i._state == Match_State.waiting :
+        for match in self.schedule_table :
+            if match._teams [0]._name not in teams :
+                teams[match._teams [0]._name] = [0] * 8
+            if match._teams [1]._name not in teams :
+                teams[match._teams [1]._name] = [0] * 8
+            if match._state == Match_State.waiting :
+                # XXX
                 continue
 
-            if i.draw ():
-                teams[i._teams [0]._name][points_idx] += 1
-                teams[i._teams [1]._name][points_idx] += 1
-                teams[i._teams [0]._name][shot_idx]   += i._teams [2]
-                teams[i._teams [1]._name][shot_idx]   += i._teams [2]
-                teams[i._teams [0]._name][got_idx]    += i._teams [3]
-                teams[i._teams [1]._name][got_idx]    += i._teams [3]
+            teams[match._teams [0]._name][no_games_idx] += 1
+            teams[match._teams [1]._name][no_games_idx] += 1
+
+            teams[match._teams [0]._name][shot_idx] += match.goals_home  ()
+            teams[match._teams [1]._name][shot_idx] += match.goals_guest ()
+
+            teams[match._teams [1]._name][got_idx] += match.goals_home  ()
+            teams[match._teams [0]._name][got_idx] += match.goals_guest ()
+
+            teams[match._teams [0]._name][diff_idx] += match.goals_home  () -  match.goals_guest ()
+            teams[match._teams [1]._name][diff_idx] += match.goals_guest () -  match.goals_home  ()
+
+            if match.draw ():
+                for i in range (2) :
+                    teams[match._teams [i]._name][points_idx] += 1
+                    teams[match._teams [i]._name][draw_idx]   += 1
             else :
-                winner = i.winner ()
-                loser  = i.loser ()
-                teams[winner[0]._name][points_idx] += 3
-                teams[winner[0]._name][shot_idx]   += winner[1]
-                teams[winner[0]._name][got_idx]    += loser [1]
-                teams[loser [0]._name][shot_idx]   += loser [1]
-                teams[loser [0]._name][got_idx]    += winner[1]
+                winner = match.winner ()
+                loser  = match.loser ()
+                teams[winner[0]._name][points_idx]    += 3
+                teams[winner[0]._name][victories_idx] += 1
+                teams[loser[0]._name][lost_idx]       += 1
+
         result = [ (x, *teams [x]) for x in teams ]
-        result.sort (key = lambda x: (x [points_idx+1], x[shot_idx+1] - x[got_idx+1], x[shot_idx+1]), reverse = True)
+        result.sort (key = lambda x: (x [points_idx+1], x[diff_idx+1] ), reverse = True)
         return (x for x in result)
 
     def scorer (self) :
@@ -164,6 +188,6 @@ class Model(object):
         for team in self.teams :
             for player in self.teams[team]._players :
                 _player = self.teams[team]._players [player]
-                scorers.append ((_player [2], _playeter [0], _player [1], team))
+                scorers.append ((_player [2], _player [0], _player [1], team))
         scorers.sort (reverse = True)
         return [x for x in scorers if x [0] > 0]

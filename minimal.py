@@ -5,12 +5,15 @@ import datetime
 
 import sys
 import PyQt5.QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget,QVBoxLayout, QGridLayout, QTableWidget, QLabel,  QTableWidgetItem, QComboBox, QTableView, QTableWidget, QInputDialog, QDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget,QVBoxLayout, QGridLayout, QTableWidget, QLabel,  QTableWidgetItem, QComboBox, QTableView, QTableWidget, QInputDialog, QDialog,QRadioButton, QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtCore import QSize, Qt, QEvent, QObject, QAbstractTableModel
 
 from model import Model, Match
+
+    
+
 
 class ClickableQTabWidget(QTabWidget):
     clicked = pyqtSignal()
@@ -34,19 +37,35 @@ class Torschuetzen (QTableWidget) :
         super ().__init__ (parent)
         self.setWindowTitle ("Torschützen")
         self.parent = parent
+        self.setRowCount   (15)
+        self.setColumnCount(3)
+        self.setHorizontalHeaderLabels(["Spieler", "Team", "Tore"])
+
 
     def update (self, model, idx = 0) :
-        print ("tupdate")
+        if len (model.scorer ()) == 0 :
+            for i in range (15) :
+                self.setItem (i, 0,  QTableWidgetItem(""))
+                self.setItem (i, 1,  QTableWidgetItem(""))
+                self.setItem (i, 2,  QTableWidgetItem(""))
+            return
+        i = 0
+        for x in model.scorer () :
+            if i < 15 :
+                self.setItem (i, 0,  QTableWidgetItem(" ".join (x[1:3])))
+                self.setItem (i, 1,  QTableWidgetItem(x[-1]))
+                self.setItem (i, 2,  QTableWidgetItem(str(x[0])))
+            i += 1
 
 class Tabelle (QTableWidget) :
     def __init__ (self, no_teams, parent = None) :
         super ().__init__()
         self.setRowCount (no_teams)
-        self.setColumnCount(8)
+        self.setColumnCount(9)
         self.setWindowTitle ("Tabelle")
         self.setHorizontalHeaderLabels(["team", "#", "S",
                                         "U", "N"
-                                        ,"Tore", "Diff", "Punkte"]
+                                        ,"Tore", "Erh.", "Diff", "Punkte"]
                                        )
         header = self.horizontalHeader ()
         for i in range (8) :
@@ -56,14 +75,9 @@ class Tabelle (QTableWidget) :
     def update (self, model, idx = 0) :
         mt = model.table ()
         for i, x in enumerate (mt) :
-            self.setItem (i, 0, QTableWidgetItem(x[0]))
-            self.setItem (i, 1, QTableWidgetItem(x[1]))
-            self.setItem (i, 2, QTableWidgetItem(x[2]))
-            self.setItem (i, 3, QTableWidgetItem(x[3]))
-            self.setItem (i, 4, QTableWidgetItem(0))
-            self.setItem (i, 5, QTableWidgetItem(0))
-            self.setItem (i, 6, QTableWidgetItem(0))
-            self.setItem (i, 7, QTableWidgetItem(0))
+            y = [str(_) for _ in x]
+            for j in range (len(y)) :
+                self.setItem (i, j, QTableWidgetItem(y[j]))
         self.show ()
 class textView(QWidget):
     def __init__(self, parent = None):
@@ -178,11 +192,8 @@ class MyTableWidget(QWidget):
             (self, Match ("1", "2"), self.tabs)
         self.layout.addWidget (self.match, 2,2)
 
-#        self.scheduler = ScheduleViewer (self)
-#        self.layout.addWidget (self.tournament, 2,1)
         self.blitztabelle = Tabelle (len(sys.argv[1:]), self)
         self.layout.addWidget (self.blitztabelle, 3,1)
-#        self.blitztabelle.setRowCount(self.no_teams)
 
         self.torschuetzen = Torschuetzen (self)
         self.layout.addWidget (self.torschuetzen, 3, 2)
@@ -204,12 +215,11 @@ class MyTableWidget(QWidget):
     def set_tabs (self, team_list) :
         self.team_names      = team_list [:]
         for i in range (self.no_teams) :
-            table = QTableWidget(20, 3, self.tabs)
+            table = QTableWidget(20, 2, self.tabs)
             self._tabs.append (table)
-            table.setHorizontalHeaderLabels(["Vorname", "Name", "Tore"])
+            table.setHorizontalHeaderLabels(["Vorname", "Name"])
             table.horizontalHeaderItem(0).setTextAlignment(Qt.AlignLeft)
             table.horizontalHeaderItem(1).setTextAlignment(Qt.AlignHCenter)
-            table.horizontalHeaderItem(2).setTextAlignment(Qt.AlignRight)
             self.tabs.addTab (table, team_list [i])
         import itertools
         matches = fixtures (self.team_names)
@@ -260,7 +270,7 @@ class MyTableWidget(QWidget):
 
 class TournamentManager (QTableWidget):
     def __init__ (self, parent) :
-        super ().__init__ (20, 3)
+        super ().__init__ (20, 2)
         self.setWindowTitle ("Tournament Manager")
         self.parent = parent
 
@@ -268,22 +278,40 @@ class TournamentManager (QTableWidget):
         self.match = MatchManager \
             (self, Match (self.parent.schedule [idx][0], self.parent.schedule [idx][1]), self.parent.tabs)
 
+
     def update (self, model, idx) :
         for i in range (len (model.schedule_table)) :
             self.setItem(i, 0, QTableWidgetItem (str(model.schedule_table[i].home())))
             self.setItem(i, 1, QTableWidgetItem (str(model.schedule_table[i].guest())))
 
-class MatchManager (QTableWidget) :
+class MatchManager (QWidget) :
+    request = pyqtSignal (int, int)    
     def __init__ (self, parent, match, tabs) :
-        super (MatchManager).__init__()
+        super ().__init__(parent)
         self.parent = parent
         self.match  = match
         self.tabs   = tabs
-        super().__init__ (20, 6)
+        self.layout      = QGridLayout  ()
+        self.mtable      = QTableWidget (20, 6)
+        self.startbutton = QPushButton ("Start Match")
+        self.stopbutton  = QPushButton ("Stop  Match")
+        self.layout.addWidget (self.startbutton, 1, 1)
+        self.layout.addWidget (self.mtable, 1, 2)
+        self.layout.addWidget (self.stopbutton, 1, 3)
+        self.setLayout(self.layout)
+
+        
+    def clear (self) :
+        for i in range (20) :
+            for j in range (6) :
+                self.mtable.setItem (i, j,QTableWidgetItem( ""))
 
     def update (self, model, idx) :
+        def cellClick (row, column) :
+            self.request.emit(row, column)
         self.team1 = team1 = model.schedule_table [idx].home ()
         self.team2 = team2 = model.schedule_table [idx].guest()
+        print (team1, team2)
         team1_index = [index for index in range(self.tabs.count())
                 if team1._name == self.tabs.tabText(index)][0]
         team2_index = [index for index in range(self.tabs.count())
@@ -291,28 +319,59 @@ class MatchManager (QTableWidget) :
 
         team1_widget = self.tabs.widget (team1_index)
         team2_widget = self.tabs.widget (team2_index)
-        self.setHorizontalHeaderLabels(["", "", team1._name, team2._name, "", ""])
+        self.buttonlist = []
+        self.mtable.setHorizontalHeaderLabels(["", "", team1._name, team2._name, "", ""])
         for i in range (team1_widget.rowCount ()) :
             e1 = team1_widget.item (i, 0).text () if team1_widget.item (i, 0) else ""
             e2 = team1_widget.item (i, 1).text () if team1_widget.item (i, 1) else ""
-            if not (e1 or e2) :
-                continue
-            self.setItem(i, 0, QTableWidgetItem ("-"))
-            self.setItem(i, 1, QTableWidgetItem ("+"))            
-            self.setItem(i, 2, QTableWidgetItem ("%s" % (i+1)))
+            if (e1 or e2) :
+                column = 0
+                btn = QPushButton ("-")                
+                self.mtable.setCellWidget(i, column, btn)
+                btn.clicked.connect(lambda *args, row=i, column=column: cellClick(row, column))
+
+                column = 1
+                btn = QPushButton ("+")
+                self.mtable.setCellWidget(i, column, btn)
+                btn.clicked.connect(
+                    lambda *args, row=i, column=column: cellClick(row, column))
+                
+                self.mtable.setItem(i, 2, QTableWidgetItem ("%s" % (i+1)))
+            else :
+                self.mtable.setItem(i, 0, QTableWidgetItem (""))
+                self.mtable.setItem(i, 1, QTableWidgetItem (""))
+                self.mtable.setItem(i, 2, QTableWidgetItem (""))
+
 
         for i in range (team2_widget.rowCount ()) :
             e1 = team2_widget.item (i, 0).text () if team2_widget.item (i, 0) else ""
             e2 = team2_widget.item (i, 1).text () if team2_widget.item (i, 1) else ""
-            if not (e1 or e2) :
-                continue
-            self.setItem(i, 3, QTableWidgetItem ("%s" % (i+1)))
-            self.setItem(i, 4, QTableWidgetItem ("+"))
-            self.setItem(i, 5, QTableWidgetItem ("-"))
+            if (e1 or e2) :
+                column = 3
+                self.mtable.setItem(i, column, QTableWidgetItem ("%s" % (i+1)))
 
-        header = self.horizontalHeader ()
+                column = 4
+                btn = QPushButton ("+")
+                btn.clicked.connect(lambda *args, row=i, column=column: cellClick(row, column))
+                self.mtable.setCellWidget(i, column, btn)
+
+                column = 5
+                btn = QPushButton ("-")
+                btn.clicked.connect(lambda *args, row=i, column=column: cellClick(row, column))                
+                self.mtable.setCellWidget(i, column, btn)                
+
+#                self.mtable.setItem(i, 5, QTableWidgetItem (QPushButton ("-")))
+            else :
+                self.mtable.setItem(i, 3, QTableWidgetItem (""))
+                self.mtable.setItem(i, 4, QTableWidgetItem (""))
+                self.mtable.setItem(i, 5, QTableWidgetItem (""))
+        print (self.mtable)
+
+
+        header = self.mtable.horizontalHeader ()
         for i in range (6) :
             header.setSectionResizeMode(i, PyQt5.QtWidgets.QHeaderView.ResizeToContents)
+        self.show()
     # end def __init__
 
 
@@ -345,11 +404,11 @@ class ScheduleViewer (QTableWidget) :
 class GUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.title = 'PyQt5 tabs - pythonspot.com'
+        self.title = '1980 Wien - Turniermanager'
         self.left = 0
         self.top = 0
-        self.width  = 1020
-        self.height = 920
+        self.width  = 1720
+        self.height = 1120
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
@@ -376,8 +435,12 @@ class Controller(object):
         row   = idx.row()
         model = idx.model()
         self.model.start_match (row)
-        self.view.table_widget.update (self.model, row)
+        self.view.table_widget.update       (self.model, row)
+        self.view.table_widget.match.clear  ()
         self.view.table_widget.match.update (self.model, row)
+
+    def change_model (self, *args, **kw) :
+        print ("change :", args, kw)
 
     def set_schedule(self):
         result = None
@@ -401,10 +464,29 @@ class Controller(object):
                 self.view.table_widget.blitztabelle.update (self.model, 0)
     # end def validate
 
+    def stop_match (self, *args, **kw) :
+        print ("Stop :", args, kw)
+        v = QMessageBox.question( self.view.table_widget.match
+                                  , "Schluuspfiff ","Do ya realy wanna quit ?"
+                                , QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+                                )
+        if v == QMessageBox.Yes :
+            self.view.table_widget.match.clear ()
+        
+        
+    def start_match_really (self, *args, **kw) :
+        print ("Start really :", args, kw)
+
+
     def connect_signals (self) :
         self.view.table_widget.tournament.clicked.connect (self.start_match)
+        self.view.table_widget.match.startbutton.clicked.connect (self.start_match_really)
+        self.view.table_widget.match.stopbutton.clicked.connect (self.stop_match)
+
+        self.view.table_widget.match.request.connect (self.goal)
         self.view.table_widget.t.close_button.clicked.connect (self.set_schedule)
-        self.view.table_widget.match.clicked.connect (self.goal)
+
+#        self.view.table_widget.match.goal.goalShot.connect (self.goal)
         self.view.table_widget.tabs.currentChanged.connect (self.players)
 
 
@@ -419,19 +501,32 @@ class Controller(object):
                 continue
             print (e1, e2)
             self.model.add_player (team, i + 1, e1, e2)
-            
-    def goal(self, idx) :
-        player_number, column = (idx.row(), idx.column())
-        item = self.view.table_widget.match.rowAt (idx.row())
-#        pprint (item)
+
+#    @pyqtSlot (int, int)
+    def goal(self, row, column) :
+#        if not self.view.table_widget.match.stopbutton.isChecked () :
+#            return
+        print (row, column)
+        player_number, column = (row + 1, column)
+        item = self.view.table_widget.match.mtable.rowAt (row)
+        print ("Player number: ", player_number, "Column: ", column)
+
         if column in (0,1) :
             team = self.model.schedule_table [self.model.running()].home()
-        else :
+        elif  column in (4,5) :
             team = self.model.schedule_table [self.model.running()].guest()
+        else :
+            return
         print ("Team:::::", team)
-        self.model.goal (team._name, player_number + 1)
+        if column in (0,5) :
+            print ("Cancel ", team._name, player_number)
+            self.model.cancel_goal (team._name, player_number)
+        else :
+            print ("Goal ", team._name, player_number)            
+            self.model.goal (team._name, player_number)
         self.view.table_widget.blitztabelle.update (self.model, 0)
-        
+        self.view.table_widget.torschuetzen.update (self.model, 0)
+
 if __name__ == "__main__" :
     model = Model()
     app   = QApplication(sys.argv)
