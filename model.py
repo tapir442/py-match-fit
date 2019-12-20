@@ -29,6 +29,15 @@ class Match (object) :
             self._teams [3] += 1
         Team.pool [team].goal (number)
 
+    def cancel_goal (self, team, number) :
+        if self._teams [0]._name == team :
+            if self._teams [2] > 0 :
+                self._teams [2] -= 1
+        else :
+            if self._teams [3] > 0 :
+                self._teams [3] -= 1
+        Team.pool [team].cancel_goal (number)
+        
     def draw (self) :
         return self._teams [2] == self._teams [3]
 
@@ -85,7 +94,6 @@ class Team (object) :
                 self.pool [self._name]._players [number][2] -= 1
         except KeyError:
             print ("Scheisse", self._name, number)
-            pass
         
     def goals (self) :
         return sum ([self._players[p][2] for p in self._players])
@@ -131,7 +139,9 @@ class Model(object):
         match.goal (team, number)
 
     def cancel_goal (self, team, number) :
-        self.teams [team].cancel_goal (number)
+        match = self.schedule_table [self._running]        
+        match.cancel_goal (team, number)
+#       self.teams [team].cancel_goal (number)
 
     def running (self) :
         return self._running
@@ -146,7 +156,7 @@ class Model(object):
         got_idx       = 5
         diff_idx      = 6
         points_idx    = 7
-        teams      = {}
+        teams         = {}
         for match in self.schedule_table :
             if match._teams [0]._name not in teams :
                 teams[match._teams [0]._name] = [0] * 8
@@ -155,7 +165,7 @@ class Model(object):
             if match._state == Match_State.waiting :
                 # XXX
                 continue
-
+            
             teams[match._teams [0]._name][no_games_idx] += 1
             teams[match._teams [1]._name][no_games_idx] += 1
 

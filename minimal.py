@@ -5,7 +5,7 @@ import datetime
 
 import sys
 import PyQt5.QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget,QVBoxLayout, QGridLayout, QTableWidget, QLabel,  QTableWidgetItem, QComboBox, QTableView, QTableWidget, QInputDialog, QDialog,QRadioButton, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget,QVBoxLayout, QGridLayout, QTableWidget, QLabel,  QTableWidgetItem, QComboBox, QTableView, QTableWidget, QInputDialog, QDialog,QRadioButton, QMessageBox, QLCDNumber
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtCore import QSize, Qt, QEvent, QObject, QAbstractTableModel
@@ -178,10 +178,22 @@ class MyTableWidget(QWidget):
         self.setLayout(self.layout)
 
 
-        schedule_button = QPushButton ("Turnierplan ändern")
-        self.layout.addWidget (schedule_button, 1, 2)
-        schedule_button.clicked.connect(self.clickSchedule)
+        w        = QWidget ()
+        w.layout = QGridLayout ()
+        self.schedule_button = QPushButton ("Turnierplan")
+        w.layout.addWidget (self.schedule_button, 1 ,1)
+        self.schedule_button.clicked.connect(self.clickSchedule)
 
+        self.result_home  = QLCDNumber (2, w)
+        self.result_home.setDecMode ()
+        w.layout.addWidget (self.result_home, 1 ,2)        
+        self.result_guest = QLCDNumber (2, w)
+        self.result_guest.setDecMode ()        
+        w.layout.addWidget (self.result_guest, 1 ,3)
+        w.show ()
+        w.setLayout (w.layout)
+        self.layout.addWidget (w, 1, 2)
+                
 #        match_button = QPushButton ("Start Match")
 #        self.layout.addWidget (match_button)
 #        match_button.clicked.connect(self.clickMatches)
@@ -245,7 +257,7 @@ class MyTableWidget(QWidget):
         self.tournament.update   (model, idx)
         self.blitztabelle.update (model, idx)
         self.torschuetzen.update (model, idx)
-
+        
     def eventFilter(self, source, event):
         if event.type() == QEvent.MouseButtonPress:
             if event.button() == Qt.RightButton:
@@ -368,7 +380,7 @@ class MatchManager (QWidget) :
         header = self.mtable.horizontalHeader ()
         for i in range (6) :
             header.setSectionResizeMode(i, PyQt5.QtWidgets.QHeaderView.ResizeToContents)
-        self.show()
+        self.show()        
     # end def __init__
 
 
@@ -510,6 +522,7 @@ class Controller(object):
             team = self.model.schedule_table [self.model.running()].guest()
         else :
             return
+        print ("team:", team._name, row, column)
         if column in (0,5) :
 #            print ("Cancel ", team._name, player_number)
             self.model.cancel_goal (team._name, player_number)
@@ -518,7 +531,12 @@ class Controller(object):
             self.model.goal (team._name, player_number)
         self.view.table_widget.blitztabelle.update (self.model, 0)
         self.view.table_widget.torschuetzen.update (self.model, 0)
-
+        idx = self.model.running ()
+        match = model.schedule_table [idx]
+        print ("====>", match._teams [2], match._teams [3])
+        self.view.table_widget.result_home.display  (match._teams [2])
+        self.view.table_widget.result_guest.display (match._teams [3])
+        
 if __name__ == "__main__" :
     model = Model()
     app   = QApplication(sys.argv)
