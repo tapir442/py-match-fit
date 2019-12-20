@@ -291,9 +291,12 @@ class TournamentManager (QTableWidget):
 
 
     def update (self, model, idx) :
+        self.setEditTriggers(QTableWidget.NoEditTriggers)
         for i in range (len (model.schedule_table)) :
             self.setItem(i, 0, QTableWidgetItem (str(model.schedule_table[i].home())))
             self.setItem(i, 1, QTableWidgetItem (str(model.schedule_table[i].guest())))
+#            v = self.item (i, 0)
+#            v->setFlags(v.flags() ^ Qt.ItemIsEditable)
 
 class MatchManager (QWidget) :
     request = pyqtSignal (int, int)    
@@ -536,6 +539,13 @@ class Controller(object):
         print ("====>", match._teams [2], match._teams [3])
         self.view.table_widget.result_home.display  (match._teams [2])
         self.view.table_widget.result_guest.display (match._teams [3])
+        if column in (1,4) :
+            vor, nach  = model.teams [team._name]._players [player_number][:2]
+            v = QMessageBox.question( self.view.table_widget.match
+                                      , "Tor für %s" % (team._name), "Torschütze mit der Nummer %s : %s %s" % (player_number, vor, nach)
+                                      , QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+               )
+
         
 if __name__ == "__main__" :
     model = Model()

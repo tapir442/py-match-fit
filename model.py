@@ -103,7 +103,6 @@ class Team (object) :
 
 # end class Team
 
-
 class Model(object):
     def __init__(self):
         self.observers      = []
