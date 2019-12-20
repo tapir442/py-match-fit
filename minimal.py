@@ -40,7 +40,7 @@ class Torschuetzen (QTableWidget) :
         self.setRowCount   (15)
         self.setColumnCount(3)
         self.setHorizontalHeaderLabels(["Spieler", "Team", "Tore"])
-
+        self.setEditTriggers(QTableWidget.NoEditTriggers)
 
     def update (self, model, idx = 0) :
         if len (model.scorer ()) == 0 :
@@ -70,7 +70,7 @@ class Tabelle (QTableWidget) :
         header = self.horizontalHeader ()
         for i in range (8) :
             header.setSectionResizeMode(i, PyQt5.QtWidgets.QHeaderView.ResizeToContents)
-
+        self.setEditTriggers(QTableWidget.NoEditTriggers)
 
     def update (self, model, idx = 0) :
         mt = model.table ()
@@ -313,7 +313,7 @@ class MatchManager (QWidget) :
         self.layout.addWidget (self.mtable, 1, 2)
         self.layout.addWidget (self.stopbutton, 1, 3)
         self.setLayout(self.layout)
-
+        self.mtable.setEditTriggers(QTableWidget.NoEditTriggers)
         
     def clear (self) :
         for i in range (20) :
@@ -540,6 +540,11 @@ class Controller(object):
         self.view.table_widget.result_home.display  (match._teams [2])
         self.view.table_widget.result_guest.display (match._teams [3])
         if column in (1,4) :
+            print ("===>", player_number, team._name)
+            for x in model.teams.items () :
+                print (x)
+            print (model.teams [team._name]._players)
+            
             vor, nach  = model.teams [team._name]._players [player_number][:2]
             v = QMessageBox.question( self.view.table_widget.match
                                       , "Tor für %s" % (team._name), "Torschütze mit der Nummer %s : %s %s" % (player_number, vor, nach)
