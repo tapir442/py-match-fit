@@ -1,14 +1,16 @@
 from enum import Enum, auto
 class Match_State (Enum):
+    """
+    """
     waiting  = auto()
     running  = auto()
     finished = auto()
 
 
-class Match (object) :
-    def __init__ (self, team1, team2) :
-        self._teams  = [team1, team2, 0, 0]
-        self._state  = Match_State.waiting
+class Match:
+    def __init__(self, team1, team2):
+        self._teams = [team1, team2, 0, 0]
+        self._state = Match_State.waiting
 
     def close (self) :
         self._state    = Match_State.finished
@@ -37,7 +39,7 @@ class Match (object) :
             if self._teams [3] > 0 :
                 self._teams [3] -= 1
         Team.pool [team].cancel_goal (number)
-        
+
     def draw (self) :
         return self._teams [2] == self._teams [3]
 
@@ -54,7 +56,7 @@ class Match (object) :
         return (self._teams [0], self._teams [2])
 
     def __str__ (self) :
-        return self._teams [0]._name +" "+ self._teams [1]._name
+        return " ".join(self._teams [0]._name, self._teams [1]._name)
 
     def goals_home (self) :
         return self._teams [2]
@@ -62,7 +64,7 @@ class Match (object) :
     def goals_guest (self) :
         return self._teams [3]
 
-class Team (object) :
+class Team  :
     pool = {}
     def __init__ (self, name) :
         self._name        = name
@@ -94,16 +96,16 @@ class Team (object) :
                 self.pool [self._name]._players [number][2] -= 1
         except KeyError:
             print ("Scheisse", self._name, number)
-        
+
     def goals (self) :
-        return sum ([self._players[p][2] for p in self._players])
+        return sum([self._players[p][2] for p in self._players])
 
     def __str__ (self) :
         return self._name
 
 # end class Team
 
-class Model(object):
+class Model:
     def __init__(self):
         self.observers      = []
         self.teams          = {}
@@ -138,7 +140,7 @@ class Model(object):
         match.goal (team, number)
 
     def cancel_goal (self, team, number) :
-        match = self.schedule_table [self._running]        
+        match = self.schedule_table [self._running]
         match.cancel_goal (team, number)
 #       self.teams [team].cancel_goal (number)
 
@@ -164,7 +166,7 @@ class Model(object):
             if match._state == Match_State.waiting :
                 # XXX
                 continue
-            
+
             teams[match._teams [0]._name][no_games_idx] += 1
             teams[match._teams [1]._name][no_games_idx] += 1
 
@@ -200,3 +202,48 @@ class Model(object):
                 scorers.append ((_player [2], _player [0], _player [1], team))
         scorers.sort (reverse = True)
         return [x for x in scorers if x [0] > 0]
+
+class Player:
+    def __init__(self, first_name: str, surname: str, number: str, team: Team):
+        """
+        >>> t = Team("FC 1980 Wien")
+        >>> p = Player("Kurt", "Tormann", "1", t)
+        >>> print(p)
+        1: Kurt Tormann, Team:FC 1980 Wien, Goals:0
+        >>> p.shot()
+        >>> print(p)
+        1: Kurt Tormann, Team:FC 1980 Wien, Goals:1
+        >>> p.shot()
+        >>> print(p)
+        1: Kurt Tormann, Team:FC 1980 Wien, Goals:2
+        >>> p.cancel_goal()
+        >>> print(p)
+        1: Kurt Tormann, Team:FC 1980 Wien, Goals:1
+        >>> p.cancel_goal()
+        >>> print(p)
+        1: Kurt Tormann, Team:FC 1980 Wien, Goals:0
+        >>> p.cancel_goal()
+        >>> print(p)
+        1: Kurt Tormann, Team:FC 1980 Wien, Goals:0
+        """
+        self.first_name   = first_name
+        self.surname      = surname
+        self.goals        = 0
+        self.team         = team
+        self.number       = number
+        # for future use
+        self.yellow_cards = 0
+        self.red_cards    = 0
+
+    def shot(self):
+        self.goals += 1
+
+    def cancel_goal(self):
+        self.goals = max(self.goals-1, 0)
+
+    def __str__(self):
+        return f"{self.number}: {self.first_name} {self.surname}, Team:{self.team}, Goals:{self.goals}"
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
