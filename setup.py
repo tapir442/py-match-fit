@@ -26,7 +26,6 @@ setup(
         'Topic :: Helper'
         ],
     keywords="Tournament sports"
-    # fixme: an empty key should be enough?
-    package_dir={'delierium': 'delierium'},
+#    package_dir={'delierium': 'delierium'},
     project_urls={'Source': 'https://github.com/tapir442/py-match-fit.git"}
 )

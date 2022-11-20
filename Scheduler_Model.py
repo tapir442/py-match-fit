@@ -108,3 +108,9 @@ class Scheduler:
         h = self.matches[i]
         self.matches[i] = self.matches[j]
         self.matches[j] = h
+
+    def print_single_match(self, i):
+        s = f"Match {i}: {self.match_starts[i-1][0]:d}:" \
+            f"{self.match_starts[i-1][1]:02d}, " \
+            f"{self.matches[i][0]} : {self.matches[i][1]}"
+        return s

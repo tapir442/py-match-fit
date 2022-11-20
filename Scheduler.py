@@ -36,6 +36,7 @@ class Window(QMainWindow, Ui_MainWindow):
         teams = self._actual_team_list()
         if txt and txt not in teams:
             self.team_list.addItem(QListWidgetItem(self.team.text()))
+        self.team.setFocus()
 
     def findAndReplace(self):
         print ("findAndReplace")
@@ -49,9 +50,12 @@ class Window(QMainWindow, Ui_MainWindow):
     def _create_schedule(self):
         teams = self._actual_team_list()
         self.schedule = Scheduler(teams)
+        self._show_schedule()
+
+    def _show_schedule(self):
+        self.show_schedule.clear()
         for i in self.schedule.matches:
-            s = f"Match {i}: {self.schedule.match_starts[i-1]} : {self.schedule.matches[i]}"
-            self.show_schedule.addItem(QListWidgetItem(s))
+            self.show_schedule.addItem(QListWidgetItem(self.schedule.print_single_match(i)))
 
     def about(self):
         QMessageBox.about(
