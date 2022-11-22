@@ -13,7 +13,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     setup_requires=["more-itertools"],
-    install_requires=["more-itertools", "PyQt6"],
+    install_requires=["more-itertools", "PyQt6", "json"],
     python_requires = ">=3.10",
     author='Martin Mayerhofer-Schöpf',
     author_email='tapir@aon.at',
