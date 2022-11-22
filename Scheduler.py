@@ -7,7 +7,7 @@ import itertools
 
 from PyQt6 import QtWidgets, uic
 from PyQt6.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QTabWidget,QVBoxLayout, QGridLayout, QTableWidget, QLabel,  QTableWidgetItem, QComboBox, QTableView, QTableWidget, QInputDialog, QDialog,QRadioButton, QMessageBox, QLCDNumber, QLineEdit, QListWidget, QListWidgetItem
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtGui import QIcon, QPixmap, QIntValidator, QValidator
 from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtCore import QSize, Qt, QEvent, QObject, QAbstractTableModel
 
@@ -17,19 +17,48 @@ from PyQt6.uic import loadUi
 from SchedulerUI import Ui_MainWindow
 from Scheduler_Model import Scheduler
 
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         self.connectSignalsSlots()
 
+
     def connectSignalsSlots(self):
-        print("SignalSlots")
         self.add_team.clicked.connect(self._add_team)
         self.create_schedule.clicked.connect(self._create_schedule)
-#        self.action_Exit.triggered.connect(self.close)
-#        self.action_Find_Replace.triggered.connect(self.findAndReplace)
-#        self.action_About.triggered.connect(self.about)
+
+        self.break_between_matches.setValidator(QIntValidator(0, 15))
+        self.match_duration.setValidator(QIntValidator(1, 90))
+        self.switch_matches.clicked.connect(self._switch_matches)
+        self.switch_team_order.clicked.connect(self._switch_home_guest)
+
+
+
+    def _switch_matches(self):
+        if not 1 <= int(self.home_team.text()) <= self._no_matches():
+            print("shit home")
+            return
+        if not 1 <= int(self.guest_team.text()) <= self._no_matches():
+            print("shit guest")
+            return
+
+        self.schedule.switch_matches(int(self.home_team.text()),
+                                     int(self.guest_team.text()))
+        self._show_schedule()
+
+    def _switch_home_guest(self):
+        idx = int(self.number_of_match_to_switch.text())
+        if not 1 <= idx <= self._no_matches():
+            print("shit switch")
+            return
+        self.schedule.switch_home_guest(idx)
+        self._show_schedule()
+
+    def _no_matches(self):
+        no_teams = len(self._actual_team_list())
+        return int(round(no_teams*(no_teams-1)/2))
 
     def _add_team(self):
         txt = self.team.text()
@@ -38,19 +67,19 @@ class Window(QMainWindow, Ui_MainWindow):
             self.team_list.addItem(QListWidgetItem(self.team.text()))
         self.team.setFocus()
 
-    def findAndReplace(self):
-        print ("findAndReplace")
-        dialog = FindReplaceDialog(self)
-        dialog.exec()
-
     def _actual_team_list(self):
         return [str(self.team_list.item(i).text())
                 for i in range(self.team_list.count())]
 
     def _create_schedule(self):
         teams = self._actual_team_list()
-        self.schedule = Scheduler(teams)
+        start = self.tournamen_start_at.time()
+        self.schedule = Scheduler(teams
+                                  , f"{start.hour()}:{start.minute()}"
+                                  , int(self.match_duration.text())
+                                  , int(self.break_between_matches.text()))
         self._show_schedule()
+
 
     def _show_schedule(self):
         self.show_schedule.clear()
