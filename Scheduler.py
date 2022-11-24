@@ -46,7 +46,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.store_schedule.clicked.connect(self._store_schedule)
 
     def _store_schedule(self):
-        json.dumps(self.schedule)
+        self.schedule.store_on_disk()
 
     def _switch_matches(self):
         if not 1 <= int(self.home_team.text()) <= self._no_matches():
