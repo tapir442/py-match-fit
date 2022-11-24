@@ -4,6 +4,8 @@ import random
 import operator
 import datetime
 import itertools
+import json
+
 
 from PyQt6 import QtWidgets, uic
 from PyQt6.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QTabWidget,QVBoxLayout, QGridLayout, QTableWidget, QLabel,  QTableWidgetItem, QComboBox, QTableView, QTableWidget, QInputDialog, QDialog,QRadioButton, QMessageBox, QLCDNumber, QLineEdit, QListWidget, QListWidgetItem
@@ -30,11 +32,21 @@ class Window(QMainWindow, Ui_MainWindow):
         self.create_schedule.clicked.connect(self._create_schedule)
 
         self.break_between_matches.setValidator(QIntValidator(0, 15))
+        self.break_between_matches.setText("1")
         self.match_duration.setValidator(QIntValidator(1, 90))
+        self.match_duration.setText("14")
+
         self.switch_matches.clicked.connect(self._switch_matches)
         self.switch_team_order.clicked.connect(self._switch_home_guest)
 
+        self.number_of_match_to_switch.setText("1")
+        self.home_team.setText("1")
+        self.guest_team.setText("1")
 
+        self.store_schedule.clicked.connect(self._store_schedule)
+
+    def _store_schedule(self):
+        json.dumps(self.schedule)
 
     def _switch_matches(self):
         if not 1 <= int(self.home_team.text()) <= self._no_matches():
