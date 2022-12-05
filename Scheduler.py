@@ -115,7 +115,7 @@ class FindReplaceDialog(QDialog):
         loadUi("ui/Scheduler.ui", self)
 
 
-if __name__ == "__main__":
+ if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Window()
     win.show()
