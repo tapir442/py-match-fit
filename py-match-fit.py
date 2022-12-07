@@ -3,8 +3,9 @@ from enum import Enum, auto
 
 
 from PyQt6.QtGui import QIcon, QPixmap, QValidator, QStandardItemModel, QStandardItem
-from PyQt6.QtCore import QSize, Qt, QEvent, QObject, QAbstractTableModel, QStringListModel
-from PyQt6.QtWidgets import QMainWindow, QApplication,QDialog,  QListWidget, QListWidgetItem,QTableWidgetItem
+from PyQt6.QtCore import QSize, Qt, QEvent, QObject, QAbstractTableModel, QStringListModel, QRect
+from PyQt6.QtWidgets import QMainWindow, QApplication,QDialog,  QListWidget, \
+    QListWidgetItem,QTableWidgetItem, QLabel
 
 import PyQt6
 
@@ -68,10 +69,10 @@ class Window(QMainWindow, Ui_MainWindow):
         )
         table.setItem(row, 2, QTableWidgetItem(ui.input_surname.text().strip()))
         table.setItem(row, 0, QTableWidgetItem(ui.input_id.text()))
-        ui.input_id.clear()
         ui.input_surname.clear()
         ui.input_name.clear()
-        ui.input_name.setFocus()
+        ui.input_id.clear()
+        ui.input_id.setFocus()
 
     def _enter_teams(self, *args, **kw):
         self.team_dialog = dialog = QDialog(self)
@@ -83,8 +84,14 @@ class Window(QMainWindow, Ui_MainWindow):
         ret = dialog.exec()
         if not ret:
             return
-        self.tournament.team = self._actual_team_list()[:]
+        self.tournament.teams = self._actual_team_list()[:]
         self.tournament.show()
+        top  = 180
+        for team in self.tournament.teams:
+            label = QLabel(team)
+            label.setGeometry(QRect(9, top, 163, 17))
+            self.centralwidget.addWidget(label)
+            top += 22
 
     def _add_team(self):
         ui  = self.team_dialog.ui
@@ -162,7 +169,6 @@ class Window(QMainWindow, Ui_MainWindow):
         ui.create_schedule_button.clicked.connect(self._create_schedule)
         teams = self._actual_team_list()
         start = self.tournament.start_time
-        breakpoint()
         self.schedule = Scheduler([])
         self.schedule = Scheduler(teams
                                   , f"{start.hour()}:{start.minute()}"

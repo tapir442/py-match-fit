@@ -17,23 +17,65 @@
    <widget class="QLabel" name="logoLabel">
     <property name="geometry">
      <rect>
-      <x>930</x>
-      <y>0</y>
-      <width>201</width>
-      <height>201</height>
+      <x>870</x>
+      <y>40</y>
+      <width>54</width>
+      <height>17</height>
      </rect>
     </property>
     <property name="text">
      <string>TextLabel</string>
     </property>
    </widget>
+   <widget class="QColumnView" name="columnView">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>160</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>1113</width>
+      <height>16777215</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="finish_tournament">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>520</y>
+      <width>621</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Finish Tournament</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="contestor_label">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>62</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Contestors</string>
+    </property>
+   </widget>
    <widget class="QPushButton" name="tournament_parameters">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>221</width>
-      <height>21</height>
+      <x>9</x>
+      <y>32</y>
+      <width>146</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="text">
@@ -43,63 +85,40 @@
    <widget class="QPushButton" name="teams_and_schedule">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>50</y>
-      <width>221</width>
-      <height>21</height>
+      <x>9</x>
+      <y>63</y>
+      <width>124</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="text">
      <string>Teams and Schedule</string>
     </property>
    </widget>
-   <widget class="QColumnView" name="columnView">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>170</y>
-      <width>256</width>
-      <height>301</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>140</y>
-      <width>131</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Match Plan</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="finish_tournament">
-    <property name="geometry">
-     <rect>
-      <x>570</x>
-      <y>590</y>
-      <width>161</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Finish Tournament</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="Roaster">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>80</y>
-      <width>221</width>
+      <x>9</x>
+      <y>94</y>
+      <width>80</width>
       <height>25</height>
      </rect>
     </property>
     <property name="text">
      <string>Roaster</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>140</y>
+      <width>63</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Match Plan</string>
     </property>
    </widget>
   </widget>
