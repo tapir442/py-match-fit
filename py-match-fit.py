@@ -1,13 +1,12 @@
 import sys
 from enum import Enum, auto
 
+from functools import partial
 
 from PyQt6.QtGui import QIcon, QPixmap, QValidator, QStandardItemModel, QStandardItem
 from PyQt6.QtCore import QSize, Qt, QEvent, QObject, QAbstractTableModel, QStringListModel, QRect
-from PyQt6.QtWidgets import QMainWindow, QApplication,QDialog,  QListWidget, \
-    QListWidgetItem,QTableWidgetItem, QLabel
-
-import PyQt6
+from PyQt6.QtWidgets import QMainWindow, QApplication, QDialog, \
+    QListWidgetItem, QTableWidgetItem, QPushButton
 
 from Model import Tournament
 from mainWindowUI import Ui_MainWindow
@@ -30,8 +29,11 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.tournament_parameters.clicked.connect(self._enter_parameters)
         self.teams_and_schedule.clicked.connect(self._enter_teams)
-        self.Roaster.clicked.connect(self._enter_members)
         self.logoLabel.setScaledContents(True)
+        self.team_dialog = QDialog(self)
+        self.team_dialog.ui = Ui_TeamAndScheduleEditor()
+        self.member_dialog = QDialog(self)
+        self.member_dialog.ui = team_member_dialog()
 
     def _enter_parameters(self, *args, **kw):
         dialog = QDialog(self)
@@ -47,9 +49,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setWindowTitle(self.tournament.name)
         self.teams_and_schedule.setEnabled(True)
 
-    def _enter_members(self, *args, **kw):
-        dialog = self.member_dialog = QDialog(self)
-        dialog.ui = team_member_dialog()
+    def _enter_members(self, team, *args, **kw):
+        breakpoint()
+        dialog = self.member_dialog
         dialog.ui.setupUi(dialog)
         dialog.ui.add_player.clicked.connect(self._add_player)
         ret = dialog.exec()
@@ -58,7 +60,9 @@ class Window(QMainWindow, Ui_MainWindow):
         ml = dialog.ui.member_list
         for i in range(ml.rowCount()):
             d = [ml.item(i, j).text() for j in range(3)]
-            self.tournament.add_player("hansi", *d)
+            self.tournament.add_player(team, *d)
+
+
 
     def _add_player(self, *args, **kw):
         ui = self.member_dialog.ui
@@ -85,14 +89,16 @@ class Window(QMainWindow, Ui_MainWindow):
         ret = dialog.exec()
         if not ret:
             return
-        self.tournament.teams = self._actual_team_list()[:]
+        for team in self._actual_team_list():
+            self.tournament.add_team(team)
         self.tournament.show()
-        top  = 130
+        top = 130
         for team in self.tournament.teams:
-            label = QLabel(team, self.centralwidget)
-            label.move(9, top)
+            pb = QPushButton(team, self.centralwidget)
+            pb.move(9, top)
             top += 22
-            label.show()
+            pb.show()
+            pb.clicked.connect(partial(self._enter_members, team))
 
     def _add_team(self):
         ui  = self.team_dialog.ui

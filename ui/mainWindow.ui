@@ -82,19 +82,6 @@
      <string>Teams and Schedule</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Roaster">
-    <property name="geometry">
-     <rect>
-      <x>9</x>
-      <y>77</y>
-      <width>80</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Roaster</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>

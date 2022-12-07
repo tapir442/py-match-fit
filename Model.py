@@ -35,8 +35,7 @@ class Tournament:
         self.duration     = 14
         self.intermission = 1
         self.start_time   = "09:00"
-        # XXX
-        self.teams        = [Match.Team("hansi")]
+        self.teams        = {}
         self.schedule     = []
 
     def show(self):
@@ -45,10 +44,10 @@ class Tournament:
 
     def add_player(self, team, number, name, surname):
         p = Match.Player(name, surname)
-        # XXX not nice
-        for t in self.teams:
-            if t.name == team:
-                t.add_player(number, p)
+        self.teams[team].add_player(number, p)
+
+    def add_team(self, team):
+        self.teams[team] = Match.Team(team)
 
 
 if __name__ == "__main__":
