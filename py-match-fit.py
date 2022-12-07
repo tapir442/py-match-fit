@@ -31,6 +31,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.tournament_parameters.clicked.connect(self._enter_parameters)
         self.teams_and_schedule.clicked.connect(self._enter_teams)
         self.Roaster.clicked.connect(self._enter_members)
+        self.logoLabel.setScaledContents(True)
 
     def _enter_parameters(self, *args, **kw):
         dialog = QDialog(self)
@@ -86,12 +87,12 @@ class Window(QMainWindow, Ui_MainWindow):
             return
         self.tournament.teams = self._actual_team_list()[:]
         self.tournament.show()
-        top  = 180
+        top  = 130
         for team in self.tournament.teams:
-            label = QLabel(team)
-            label.setGeometry(QRect(9, top, 163, 17))
-            self.centralwidget.addWidget(label)
+            label = QLabel(team, self.centralwidget)
+            label.move(9, top)
             top += 22
+            label.show()
 
     def _add_team(self):
         ui  = self.team_dialog.ui

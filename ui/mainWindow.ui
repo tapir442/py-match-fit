@@ -14,24 +14,11 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="logoLabel">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>40</y>
-      <width>54</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
    <widget class="QColumnView" name="columnView">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>160</y>
+      <x>161</x>
+      <y>131</y>
       <width>256</width>
       <height>192</height>
      </rect>
@@ -46,9 +33,9 @@
    <widget class="QPushButton" name="finish_tournament">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>520</y>
-      <width>621</width>
+      <x>161</x>
+      <y>329</y>
+      <width>115</width>
       <height>25</height>
      </rect>
     </property>
@@ -59,8 +46,8 @@
    <widget class="QLabel" name="contestor_label">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>140</y>
+      <x>9</x>
+      <y>108</y>
       <width>62</width>
       <height>17</height>
      </rect>
@@ -73,7 +60,7 @@
     <property name="geometry">
      <rect>
       <x>9</x>
-      <y>32</y>
+      <y>9</y>
       <width>146</width>
       <height>25</height>
      </rect>
@@ -86,7 +73,7 @@
     <property name="geometry">
      <rect>
       <x>9</x>
-      <y>63</y>
+      <y>46</y>
       <width>124</width>
       <height>25</height>
      </rect>
@@ -99,7 +86,7 @@
     <property name="geometry">
      <rect>
       <x>9</x>
-      <y>94</y>
+      <y>77</y>
       <width>80</width>
       <height>25</height>
      </rect>
@@ -111,14 +98,27 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>140</y>
+      <x>161</x>
+      <y>108</y>
       <width>63</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
      <string>Match Plan</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="logoLabel">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>40</y>
+      <width>181</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>
