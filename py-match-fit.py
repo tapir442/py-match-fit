@@ -39,6 +39,7 @@ class Window(QMainWindow, Ui_MainWindow):
         dialog = QDialog(self)
         dialog.ui = Ui_parameter()
         dialog.ui.setupUi(dialog)
+        # XXX: read team if members are already existing
         ret = dialog.exec()
         if not ret:
             return
@@ -50,7 +51,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.teams_and_schedule.setEnabled(True)
 
     def _enter_members(self, team, *args, **kw):
-        breakpoint()
         dialog = self.member_dialog
         dialog.ui.setupUi(dialog)
         dialog.ui.add_player.clicked.connect(self._add_player)
@@ -70,9 +70,9 @@ class Window(QMainWindow, Ui_MainWindow):
         row = table.rowCount()
         table.insertRow(row)
         table.setItem(row, 1, QTableWidgetItem(
-            ui.input_name.text().strip())
+            ui.input_name.text().strip().title())
         )
-        table.setItem(row, 2, QTableWidgetItem(ui.input_surname.text().strip()))
+        table.setItem(row, 2, QTableWidgetItem(ui.input_surname.text().strip().title()))
         table.setItem(row, 0, QTableWidgetItem(ui.input_id.text()))
         ui.input_surname.clear()
         ui.input_name.clear()

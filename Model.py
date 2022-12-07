@@ -43,7 +43,7 @@ class Tournament:
         print(self.schedule)
 
     def add_player(self, team, number, name, surname):
-        p = Match.Player(name, surname)
+        p = Match.Player(name.title(), surname.title())
         self.teams[team].add_player(number, p)
 
     def add_team(self, team):
