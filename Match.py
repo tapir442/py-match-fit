@@ -27,7 +27,6 @@ class Bounded_Counter:
         return str(self.value)
 
 class Player:
-
     """
     >>> p = Player("Kurt", "Goalkeeper")
     >>> print(p.name, p.surname, p.suspended, p.goals, p.assists, p.yellow_cards, p.red_cards)
@@ -129,6 +128,8 @@ class Team:
     def scored(self, number: any) -> None:
         self.players[str(number)].scored()
 
+    def __hash__(self):
+        return hash(self.name)
 
 class Match:
     """
