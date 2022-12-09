@@ -1,12 +1,11 @@
-import sys
-from enum import Enum, auto
+"""
+"""
 
+import sys
 from functools import partial
 
-from PyQt6.QtGui import QIcon, QPixmap, QValidator, QStandardItemModel, QStandardItem
-from PyQt6.QtCore import QSize, Qt, QEvent, QObject, QAbstractTableModel, QStringListModel, QRect
 from PyQt6.QtWidgets import QMainWindow, QApplication, QDialog, \
-    QListWidgetItem, QTableWidgetItem, QPushButton
+    QListWidgetItem, QTableWidgetItem, QPushButton, QMessageBox, QErrorMessage
 
 from Model import Tournament
 from mainWindowUI import Ui_MainWindow
@@ -27,6 +26,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.teams_and_schedule.setEnabled(False)
         self.finish_tournament.setEnabled(True)
 
+        self.setup_parameter_ui()
         self.tournament_parameters.clicked.connect(self._enter_parameters)
         self.teams_and_schedule.clicked.connect(self._enter_teams)
         self.logoLabel.setScaledContents(True)
@@ -35,13 +35,29 @@ class Window(QMainWindow, Ui_MainWindow):
         self.member_dialog = QDialog(self)
         self.member_dialog.ui = team_member_dialog()
 
-    def _enter_parameters(self, *args, **kw):
-        dialog = QDialog(self)
+    def setup_parameter_ui(self):
+        self.parameters_dialog = dialog = QDialog(self)
         dialog.ui = Ui_parameter()
         dialog.ui.setupUi(dialog)
+        dialog.ui.tournamentName.textChanged.connect(self._check_tournament_name)
+
+    def _check_tournament_name(self, s):
+        if s:
+            return True
+        msg = QErrorMessage()
+        msg.showMessage("gib wos ein")
+        msg.exec()
+        self.parameters_dialog.ui.tournamentName.setFocus()
+        return False
+
+    def _enter_parameters(self, *args, **kw):
+        dialog = self.parameters_dialog
+ #       dialog.ui.setupUi(dialog)
         # XXX: read team if members are already existing
         ret = dialog.exec()
         if not ret:
+            return
+        if not self._check_tournament_name(dialog.ui.tournamentName.text()):
             return
         self.tournament.duration     = dialog.ui.match_duration.value()
         self.tournament.intermission = dialog.ui.intermission.value()
@@ -80,8 +96,7 @@ class Window(QMainWindow, Ui_MainWindow):
         ui.input_id.setFocus()
 
     def _enter_teams(self, *args, **kw):
-        self.team_dialog = dialog = QDialog(self)
-        dialog.ui = Ui_TeamAndScheduleEditor()
+        dialog = self.team_dialog
         dialog.ui.setupUi(dialog)
         dialog.ui.addTeam.pressed.connect(self._add_team)
         dialog.ui.create_schedule_button.clicked.connect(self._create_schedule)
@@ -198,9 +213,13 @@ class Window(QMainWindow, Ui_MainWindow):
 #            "<p>- Python</p>",
 #        )
 
+def main_GUI():
+    roster = QApplication(sys.argv)
+    gui    = Window()
+    gui.show()
+    return roster, gui
+
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = Window()
-    win.show()
+    app, ui = main_GUI()
     sys.exit(app.exec())
