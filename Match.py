@@ -49,8 +49,15 @@ class Player:
     >>> p.goal_was_cancelled()
     >>> print(p.name, p.surname, p.suspended, p.goals, p.assists, p.yellow_cards, p.red_cards)
     Kurt Goalkeeper False 0 1 0 0
-    >>> p.json()
-    {'name': 'Kurt', 'surname': 'Goalkeeper', 'suspended': 'False', 'goals': '0', 'assists': '1', 'yellow_cards': '0', 'red_cards': '0'}
+    >>> from pprint import pprint
+    >>> pprint(p.json())
+    {'assists': '1',
+     'goals': '0',
+     'name': 'Kurt',
+     'red_cards': '0',
+     'surname': 'Goalkeeper',
+     'suspended': 'False',
+     'yellow_cards': '0'}
     """
     def __init__(self, name: str, surname: str):
         self.name         = name
