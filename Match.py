@@ -121,6 +121,8 @@ class Team:
     >>> team.delete_player("3")
     >>> print([_.surname for _ in team.players.values()])
     ['Goalesel', 'Ausputzer']
+    >>> from pprint import pprint
+    >>> pprint(team.json())
     """
     pool = {}
 
@@ -145,7 +147,16 @@ class Team:
         return hash(self.name)
 
     def json(self):
-        json.dumps(self.__dict__, default = Team.json, indent = 4)
+        d = {}
+        for k in self.__dict__:
+            if k == "name":
+                d[k] = self.__dict__[k]
+            if k == "pool":
+                continue
+            if k == "players":
+                d["players"] = 0
+
+        json.dumps(d)
 
 class Match:
     """
