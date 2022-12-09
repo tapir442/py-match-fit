@@ -3,9 +3,15 @@
 
 import sys
 from functools import partial
+import argparse
 
-from PyQt6.QtWidgets import QMainWindow, QApplication, QDialog, \
-    QListWidgetItem, QTableWidgetItem, QPushButton, QMessageBox, QErrorMessage
+import PyQt6
+
+from PyQt6.QtWidgets import \
+    QMainWindow, \
+    QApplication, \
+    QDialog, \
+    QListWidgetItem, QTableWidgetItem, QPushButton, QErrorMessage
 
 from Model import Tournament
 from mainWindowUI import Ui_MainWindow
@@ -52,8 +58,6 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def _enter_parameters(self, *args, **kw):
         dialog = self.parameters_dialog
- #       dialog.ui.setupUi(dialog)
-        # XXX: read team if members are already existing
         ret = dialog.exec()
         if not ret:
             return
@@ -62,7 +66,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.tournament.duration     = dialog.ui.match_duration.value()
         self.tournament.intermission = dialog.ui.intermission.value()
         self.tournament.name         = dialog.ui.tournamentName.text()
-        self.tournament.start_time   = dialog.ui.startTime.time()
+        self.tournament.start_time   = str(dialog.ui.startTime.time())
+        self.tournament.store()
         self.setWindowTitle(self.tournament.name)
         self.teams_and_schedule.setEnabled(True)
 
@@ -77,8 +82,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i in range(ml.rowCount()):
             d = [ml.item(i, j).text() for j in range(3)]
             self.tournament.add_player(team, *d)
-
-
+        self.tournament.store()
 
     def _add_player(self, *args, **kw):
         ui = self.member_dialog.ui
@@ -94,6 +98,7 @@ class Window(QMainWindow, Ui_MainWindow):
         ui.input_name.clear()
         ui.input_id.clear()
         ui.input_id.setFocus()
+        self.tournament.store()
 
     def _enter_teams(self, *args, **kw):
         dialog = self.team_dialog
@@ -114,16 +119,17 @@ class Window(QMainWindow, Ui_MainWindow):
             top += 22
             pb.show()
             pb.clicked.connect(partial(self._enter_members, team))
+        self.tournament.store()
 
     def _add_team(self):
-        ui  = self.team_dialog.ui
+        ui = self.team_dialog.ui
         txt = ui.team.text()
         teams = self._actual_team_list()
         if txt and txt not in teams:
             ui.team_list.addItem(QListWidgetItem(ui.team.text()))
         ui.team.clear()
         ui.team.setFocus()
-
+        self.tournament.store()
 
 
 #    def rowCount(self, index):
@@ -190,13 +196,14 @@ class Window(QMainWindow, Ui_MainWindow):
         ui = self.team_dialog.ui
         ui.create_schedule_button.clicked.connect(self._create_schedule)
         teams = self._actual_team_list()
-        start = self.tournament.start_time
+        start = eval(self.tournament.start_time)
         self.schedule = Scheduler([])
         self.schedule = Scheduler(teams
                                   , f"{start.hour()}:{start.minute()}"
                                   , int(self.tournament.duration)
                                   , int(self.tournament.intermission))
         self._show_schedule()
+        self.tournament.store()
 
     def _show_schedule(self):
         ui = self.team_dialog.ui

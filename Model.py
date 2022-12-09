@@ -1,36 +1,34 @@
-from enum import Enum, auto
+#from enum import Enum, auto
 
-from statemachine import StateMachine, State
+#from statemachine import StateMachine, State
 
-class Tournament_Machine(StateMachine):
-    tabula_rasa    = State("tabula_rasa", initial=True)
-    params         = State("params")
+#class Tournament_Machine(StateMachine):
+#    tabula_rasa    = State("tabula_rasa", initial=True)
+#    params         = State("params")
 #    parameters_set = State("parameters_set")
 #    teams_set      = State("teams_set")
- #   scheduled      = State("scheduled")
+#    scheduled      = State("scheduled")
 #    match_ready    = State("match_ready")
 #    match_running  = State("match_running")
 #    match_finished = State("match_finished")
 #    finished       = State("finished")
 
-    enter_params   = tabula_rasa.to(params)
+#    enter_params   = tabula_rasa.to(params)
 
-    def on_enter_params(self, disable=None, enable=None, *args, **kw):
-        print(locals())
-        print("on_enter_params")
+#    def on_enter_params(self, disable=None, enable=None, *args, **kw):
+#        print(locals())
+#        print("on_enter_params")
 
 
-import itertools
-import datetime
 import json
-
 import Match
 
-from PyQt6.QtCore import QSize, Qt, QEvent, QObject, QAbstractTableModel, QAbstractListModel
 
 class Tournament:
+    """
+    Models a tournament
+    """
     def __init__(self):
-        self.StateMachine = Tournament_Machine()
         self.name         = "No Tournament given"
         self.duration     = 14
         self.intermission = 1
@@ -49,8 +47,10 @@ class Tournament:
     def add_team(self, team):
         self.teams[team] = Match.Team(team)
 
+    def store(self):
+        with open("hansi.txt", "w") as f:
+            f.write(json.dumps(self.__dict__, indent=4))
 
 if __name__ == "__main__":
     t = Tournament_Machine()
-    print(t.current_state)
     t.enter_params()

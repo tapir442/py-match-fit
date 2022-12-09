@@ -1,6 +1,6 @@
 import sys
 from enum import Enum, auto
-
+import json
 
 class Match_State (Enum):
     """
@@ -49,6 +49,8 @@ class Player:
     >>> p.goal_was_cancelled()
     >>> print(p.name, p.surname, p.suspended, p.goals, p.assists, p.yellow_cards, p.red_cards)
     Kurt Goalkeeper False 0 1 0 0
+    >>> p.json()
+    {'name': 'Kurt', 'surname': 'Goalkeeper', 'suspended': 'False', 'goals': '0', 'assists': '1', 'yellow_cards': '0', 'red_cards': '0'}
     """
     def __init__(self, name: str, surname: str):
         self.name         = name
@@ -90,7 +92,11 @@ class Player:
     def no_assist(self):
         self.assists.decrement()
 
-
+    def json(self):
+        d = {}
+        for k, v in self.__dict__.items():
+            d [k] = str(v)
+        return d
 
 class Team:
     """
@@ -98,14 +104,14 @@ class Team:
     >>> team = Team("FC 1980 Wien")
     >>> from Match import Player
     >>> p = Player("Kurt", "Goalesel")
-    >>> team.add_player(1, p)
+    >>> team.add_player("1", p)
     >>> print(team.name, [(_[0], _[1].surname) for _ in team.players.items()])
     FC 1980 Wien [('1', 'Goalesel')]
-    >>> team.add_player(3, Player("Simon", "Libero"))
-    >>> team.add_player(5, Player("Erich", "Ausputzer"))
+    >>> team.add_player("3", Player("Simon", "Libero"))
+    >>> team.add_player("5", Player("Erich", "Ausputzer"))
     >>> print([_.surname for _ in team.players.values()])
     ['Goalesel', 'Libero', 'Ausputzer']
-    >>> team.delete_player(3)
+    >>> team.delete_player("3")
     >>> print([_.surname for _ in team.players.values()])
     ['Goalesel', 'Ausputzer']
     """
@@ -116,20 +122,23 @@ class Team:
         self.players      = {}
         self.pool  [name] = self
 
-    def add_player(self, number:any, player:Player) -> None:
-        self.pool[self.name].players[str(number)] = player
+    def add_player(self, number:str, player:Player) -> None:
+        self.pool[self.name].players[number] = player
 
-    def delete_player(self, number: any) -> None:
+    def delete_player(self, number: str) -> None:
         try:
-            del self.players[str(number)]
+            del self.players[number]
         except KeyError:
             pass
 
-    def scored(self, number: any) -> None:
-        self.players[str(number)].scored()
+    def scored(self, number: str) -> None:
+        self.players[number].scored()
 
     def __hash__(self):
         return hash(self.name)
+
+    def json(self):
+        json.dumps(self.__dict__, default = Team.json, indent = 4)
 
 class Match:
     """
@@ -137,19 +146,19 @@ class Match:
     >>> teamh = Team("FC 1980 Wien")
     >>> from Match import Player
     >>> p = Player("Kurt", "Goalesel")
-    >>> teamh.add_player(1, p)
-    >>> teamh.add_player(3, Player("Simon", "Libero"))
-    >>> teamh.add_player(5, Player("Erich", "Ausputzer"))
+    >>> teamh.add_player("1", p)
+    >>> teamh.add_player("3", Player("Simon", "Libero"))
+    >>> teamh.add_player("5", Player("Erich", "Ausputzer"))
     >>> teamg = Team("All Stars")
-    >>> teamg.add_player(1, Player("Olli", "Schiff"))
+    >>> teamg.add_player("1", Player("Olli", "Schiff"))
     >>> teamg.add_player("2b", Player("David", "Alaber"))
-    >>> teamg.add_player(3, Player("Tschuck", "Norris"))
-    >>> teamg.add_player(4, Player("Hansi", "Kranki"))
+    >>> teamg.add_player("3", Player("Tschuck", "Norris"))
+    >>> teamg.add_player("4", Player("Hansi", "Kranki"))
     >>> match = Match(teamh, teamg)
-    >>> match.home_scored(3)
+    >>> match.home_scored("3")
     >>> match.home_wins(), match.draw(), match.guest_wins(), match.running_score
     (True, False, False, (1, 0))
-    >>> match.guest_scored(3)
+    >>> match.guest_scored("3")
     >>> match.home_wins(), match.draw(), match.guest_wins(), match.running_score
     (False, True, False, (1, 1))
     """
