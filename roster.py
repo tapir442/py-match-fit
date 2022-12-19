@@ -19,6 +19,7 @@ from Model import Tournament
 from mainWindowUI import Ui_MainWindow
 from parameterUI import Ui_parameter
 from team_membersUI import Ui_Dialog as team_member_dialog
+from match_dialogUI import Ui_Match_Dialog
 
 from TeamEditorUI import Ui_TeamAndScheduleEditor
 from Scheduler_Model import Scheduler
@@ -43,10 +44,18 @@ class Window(QMainWindow, Ui_MainWindow):
         self.member_dialog = QDialog(self)
         self.member_dialog.ui = team_member_dialog()
         self.matchPlan.itemClicked.connect(self._match_selected)
+        self.setup_match()
         self.start_match.clicked.connect(self._start_match)
 
+    def setup_match(self):
+        self.match_dialog = dialog = QDialog(self)
+        dialog.ui = Ui_Match_Dialog()
+        dialog.ui.setupUi(dialog)
+
     def _start_match(self, *args, **kw):
-        print(args, kw)
+        dialog = self.match_dialog
+        ret = dialog.exec()
+
 
     def _match_selected(self, item):
 #        print(dir(item))
