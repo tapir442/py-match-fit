@@ -7,6 +7,8 @@ import argparse
 
 import PyQt6
 
+from PyQt6.QtCore import Qt
+
 from PyQt6.QtWidgets import \
     QMainWindow, \
     QApplication, \
@@ -40,6 +42,18 @@ class Window(QMainWindow, Ui_MainWindow):
         self.team_dialog.ui = Ui_TeamAndScheduleEditor()
         self.member_dialog = QDialog(self)
         self.member_dialog.ui = team_member_dialog()
+        self.matchPlan.itemClicked.connect(self._match_selected)
+        self.start_match.clicked.connect(self._start_match)
+
+    def _start_match(self, *args, **kw):
+        print(args, kw)
+
+    def _match_selected(self, item):
+#        print(dir(item))
+#        print(item.text())
+#        print(self..getCurrentRow())
+        print(self.matchPlan.currentItem().text())
+        print(dir(self.matchPlan.currentItem()))
 
     def setup_parameter_ui(self):
         self.parameters_dialog = dialog = QDialog(self)
@@ -120,11 +134,10 @@ class Window(QMainWindow, Ui_MainWindow):
             pb.show()
             pb.clicked.connect(partial(self._enter_members, team))
         self.tournament.store()
-        row = 1
-        breakpoint()
         for match_no, match in self.schedule.matches.items():
             self.matchPlan.addItem(":".join(match))
         self.matchPlan.show()
+        self.matchPointer.setText(str(self.matchPlan.item(self.tournament.match_idx )))
 
     def _add_team(self):
         ui = self.team_dialog.ui

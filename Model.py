@@ -35,6 +35,8 @@ class Tournament:
         self.start_time   = "09:00"
         self.teams        = {}
         self.schedule     = []
+        self.match_idx    = 0
+
 
     def show(self):
         print(self.teams)
