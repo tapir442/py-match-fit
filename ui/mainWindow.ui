@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QColumnView" name="columnView">
+   <widget class="QListWidget" name="matchPlan">
     <property name="geometry">
      <rect>
       <x>161</x>

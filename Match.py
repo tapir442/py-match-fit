@@ -156,7 +156,7 @@ class Team:
             if k == "players":
                 d["players"] = 0
 
-        json.dumps(d)
+        return json.dumps(d)
 
 class Match:
     """

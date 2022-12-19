@@ -48,6 +48,7 @@ class Tournament:
         self.teams[team] = Match.Team(team)
 
     def store(self):
+        return
         with open("hansi.txt", "w") as f:
             f.write(json.dumps(self.__dict__, indent=4))
 

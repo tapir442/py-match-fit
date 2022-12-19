@@ -120,6 +120,11 @@ class Window(QMainWindow, Ui_MainWindow):
             pb.show()
             pb.clicked.connect(partial(self._enter_members, team))
         self.tournament.store()
+        row = 1
+        breakpoint()
+        for match_no, match in self.schedule.matches.items():
+            self.matchPlan.addItem(":".join(match))
+        self.matchPlan.show()
 
     def _add_team(self):
         ui = self.team_dialog.ui
