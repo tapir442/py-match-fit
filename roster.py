@@ -4,10 +4,11 @@
 import sys
 from functools import partial
 import argparse
+import pickle
 
 import PyQt6
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTime
 
 from PyQt6.QtWidgets import \
     QMainWindow, \
@@ -28,11 +29,20 @@ from Scheduler_Model import Scheduler
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.tournament = Tournament()
+        if len(sys.argv) == 1:
+            self.tournament = Tournament()
+        else:
+            with open(sys.argv[1], "rb") as _:
+                self.tournament = pickle.load(_)
         self.setupUi(self)
         # State tabula rasa
         self.tournament_parameters.setEnabled(True)
-        self.teams_and_schedule.setEnabled(False)
+
+        if self.tournament.name:
+            self.teams_and_schedule.setEnabled(True)
+        else:
+            self.teams_and_schedule.setEnabled(True)
+
         self.finish_tournament.setEnabled(True)
 
         self.setup_parameter_ui()
@@ -54,15 +64,15 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def _start_match(self, *args, **kw):
         dialog = self.match_dialog
+        dialog.ui.home_label.setText("AAAAAAAAAAAAAA")
+        dialog.ui.visiting_label.setText("BBBBBBBBBBB")
         ret = dialog.exec()
 
 
     def _match_selected(self, item):
-#        print(dir(item))
-#        print(item.text())
-#        print(self..getCurrentRow())
         print(self.matchPlan.currentItem().text())
         print(dir(self.matchPlan.currentItem()))
+
 
     def setup_parameter_ui(self):
         self.parameters_dialog = dialog = QDialog(self)
@@ -81,6 +91,14 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def _enter_parameters(self, *args, **kw):
         dialog = self.parameters_dialog
+        dialog.ui.match_duration.setValue(self.tournament.duration)
+        dialog.ui.intermission.setValue(self.tournament.intermission)
+        dialog.ui.tournamentName.setText(self.tournament.name)
+        gnu = eval(self.tournament.start_time)
+#        breakpoint()
+#        print(gnu.__class__, gnu)
+        time = QTime(gnu.hour(), gnu.minute())
+        dialog.ui.startTime.setTime(time)
         ret = dialog.exec()
         if not ret:
             return
@@ -126,6 +144,10 @@ class Window(QMainWindow, Ui_MainWindow):
     def _enter_teams(self, *args, **kw):
         dialog = self.team_dialog
         dialog.ui.setupUi(dialog)
+        for team in self.tournament.teams:
+            dialog.ui.team_list.addItem(team)
+        for match in self.tournament.schedule:
+            dialog.ui.scheduleEditor.addItem(match)
         dialog.ui.addTeam.pressed.connect(self._add_team)
         dialog.ui.create_schedule_button.clicked.connect(self._create_schedule)
         dialog.show()
@@ -134,6 +156,8 @@ class Window(QMainWindow, Ui_MainWindow):
             return
         for team in self._actual_team_list():
             self.tournament.add_team(team)
+        for i in range(dialog.ui.scheduleEditor.count()):
+            self.tournament.schedule.append(dialog.ui.scheduleEditor.item(i).text())
         self.tournament.show()
         top = 130
         for team in self.tournament.teams:
@@ -142,11 +166,11 @@ class Window(QMainWindow, Ui_MainWindow):
             top += 22
             pb.show()
             pb.clicked.connect(partial(self._enter_members, team))
-        self.tournament.store()
         for match_no, match in self.schedule.matches.items():
             self.matchPlan.addItem(":".join(match))
         self.matchPlan.show()
         self.matchPointer.setText(str(self.matchPlan.item(self.tournament.match_idx )))
+        self.tournament.store()
 
     def _add_team(self):
         ui = self.team_dialog.ui

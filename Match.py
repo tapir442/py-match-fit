@@ -9,22 +9,32 @@ class Match_State (Enum):
     running  = auto()
     finished = auto()
 
+class CustomEncoder(json.JSONEncoder):
+    def default(self, o):
+        if "tojson" in dir(o):
+            return o.tojson()
+        return json.JSONEncoder.default(self, o)
+
 
 class Bounded_Counter:
-    def __init__(self, lower=0, upper=None, step=1):
+    def __init__(self, lower=0, upper=sys.maxsize, step=1):
         self.lower = lower
-        self.upper = sys.maxsize
+        self.upper = upper
         self.value = lower
         self.step  = step
 
-    def increment(self):
-        self.value = min(self.upper, self.value + self.step)
+    def increment(self, step=0):
+        self.value = min(self.upper, self.value + (self.step if not step else step))
 
-    def decrement(self):
-        self.value = max(self.lower, self.value - self.step)
+    def decrement(self, step=0):
+        self.value = max(self.lower, self.value - (self.step if not step else step))
 
     def __str__(self):
         return str(self.value)
+
+    def tojson(self):
+        return json.dumps(self.__dict__, indent=4, cls=CustomEncoder)
+
 
 class Player:
     """
@@ -50,7 +60,7 @@ class Player:
     >>> print(p.name, p.surname, p.suspended, p.goals, p.assists, p.yellow_cards, p.red_cards)
     Kurt Goalkeeper False 0 1 0 0
     >>> from pprint import pprint
-    >>> pprint(p.json())
+    >>> pprint(p.tojson())
     {'assists': '1',
      'goals': '0',
      'name': 'Kurt',
@@ -99,7 +109,7 @@ class Player:
     def no_assist(self):
         self.assists.decrement()
 
-    def json(self):
+    def tojson(self):
         d = {}
         for k, v in self.__dict__.items():
             d [k] = str(v)
@@ -122,7 +132,12 @@ class Team:
     >>> print([_.surname for _ in team.players.values()])
     ['Goalesel', 'Ausputzer']
     >>> from pprint import pprint
-    >>> pprint(team.json())
+    >>> pprint(team.tojson())
+    ('{"name": "FC 1980 Wien", "players": {"1": {"name": "Kurt", "surname": '
+     '"Goalesel", "suspended": "False", "goals": "0", "assists": "0", '
+     '"yellow_cards": "0", "red_cards": "0"}, "5": {"name": "Erich", "surname": '
+     '"Ausputzer", "suspended": "False", "goals": "0", "assists": "0", '
+     '"yellow_cards": "0", "red_cards": "0"}}}')
     """
     pool = {}
 
@@ -146,7 +161,10 @@ class Team:
     def __hash__(self):
         return hash(self.name)
 
-    def json(self):
+    def tojson(self):
+        """
+        Serialize
+        """
         d = {}
         for k in self.__dict__:
             if k == "name":
@@ -154,9 +172,11 @@ class Team:
             if k == "pool":
                 continue
             if k == "players":
-                d["players"] = 0
-
+                d["players"] = {}
+                for playerid in self.players:
+                    d["players"][playerid] = self.players[playerid].tojson()
         return json.dumps(d)
+
 
 class Match:
     """

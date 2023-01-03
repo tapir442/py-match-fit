@@ -50,9 +50,23 @@ class Tournament:
         self.teams[team] = Match.Team(team)
 
     def store(self):
+        import pickle
+        with open("hansi.pickle", "wb") as f:
+            pickle.dump(self, f)
         return
+        d = {}
+        print ("........")
+        for a in self.__dict__:
+            if a not in ["teams", "schedule"]:
+                d[a] = getattr(self, a)
+            elif a == "teams":
+                d["teams"] = {}
+                for t in self.teams:
+                    d["teams"][t] = self.teams[t].tojson()
+            elif a == "schedule":
+                pass
         with open("hansi.txt", "w") as f:
-            f.write(json.dumps(self.__dict__, indent=4))
+            f.write(json.dumps(d, indent=4))
 
 if __name__ == "__main__":
     t = Tournament_Machine()

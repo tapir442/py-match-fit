@@ -48,11 +48,29 @@ class Scheduler:
         self.matches = {}
         i = 0
         self.match_starts = [(tournament_start.hour, tournament_start.minute)]
+#        i = 0
+#        n = len(teams)
+#        while i < n-1:
+#            print('Runde ' + str(i+1) + ':')
+#            print(teams[n-1], ':', teams[i])
+#            j = 1
+#            while j < n/2:
+#                a = i-j
+#                b = i+j
+#                if a < 0:
+#                    a = a + (n-1)
+#                if b > n-2:
+#                    b = b - (n-1)
+#                print(teams[a], ':', teams[b])
+#                j = j+1
+#            i = i+1
+
         for match in itertools.combinations(teams, 2):
             i += 1
             self.matches[i] = list(match)
             tournament_start += game_duration + break_duration
             self.match_starts.append((tournament_start.hour, tournament_start.minute))
+
         del self.match_starts[-1]
 
     def switch_home_guest(self, i):
