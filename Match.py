@@ -147,7 +147,7 @@ class Team:
         self.pool  [name] = self
 
     def add_player(self, number:str, player:Player) -> None:
-        self.pool[self.name].players[number] = player
+        self.players[number] = player
 
     def delete_player(self, number: str) -> None:
         try:
@@ -188,7 +188,7 @@ class Match:
     >>> teamh.add_player("3", Player("Simon", "Libero"))
     >>> teamh.add_player("5", Player("Erich", "Ausputzer"))
     >>> teamg = Team("All Stars")
-    >>> teamg.add_player("1", Player("Olli", "Schiff"))
+    >>> teamg.add_plaxbyer("1", Player("Olli", "Schiff"))
     >>> teamg.add_player("2b", Player("David", "Alaber"))
     >>> teamg.add_player("3", Player("Tschuck", "Norris"))
     >>> teamg.add_player("4", Player("Hansi", "Kranki"))
