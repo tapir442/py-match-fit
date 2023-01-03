@@ -87,19 +87,44 @@ class Window(QMainWindow, Ui_MainWindow):
         mm = mm.match(my_match)
         dialog.ui.home_label.setText(mm.groupdict()["home"])
         dialog.ui.visiting_label.setText(mm.groupdict()["guest"])
-        breakpoint()
         # XXX simplify
+        top = 120
+        row = 0
         for player in self.tournament.teams[mm.groupdict()["home"]].players:
             player_data = self.tournament.teams[mm.groupdict()["home"]].players[player]
             v = "%s  %s  %s" % (player, player_data.name, player_data.surname)
             dialog.ui.home_team.addItem(v)
+            button = QPushButton("+", dialog)
+            button.setGeometry (33, top, 10, 10)
+            button.clicked.connect(partial(self.click_plus, row))
+            top += 22
+            row += 1
+        top = 120
+        row = 0
         for player in self.tournament.teams[mm.groupdict()["guest"]].players:
             player_data = self.tournament.teams[mm.groupdict()["guest"]].players[player]
             v = "%s  %s  %s" % (player, player_data.name, player_data.surname)
             dialog.ui.visiting_team.addItem(v)
+            button = QPushButton("-", dialog)
+            button.setGeometry(23, top, 20, 10)
+            button.clicked.connect(partial(self.click_plus, row))
+            top += 22
+            row += 1
 
 
         ret = dialog.exec()
+
+    def click_plus(self, row):
+        print("plus home", row)
+
+    def click_minus(self, row):
+        print("minus home", row)
+
+    def click_plus_guest(self, row):
+        print("guest home", row)
+
+    def click_minus_guest(self, row):
+        print("guest home", row)
 
 
     def _match_selected(self, item):
