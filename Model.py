@@ -23,7 +23,7 @@
 import json
 import Match
 import pickle
-
+import datetime
 
 class Tournament:
     """
@@ -33,7 +33,7 @@ class Tournament:
         self.name         = "No Tournament given"
         self.duration     = 14
         self.intermission = 1
-        self.start_time   = "09:00"
+        self.start_time   = datetime.time(hour=9, minute=0)
         self.teams        = {}
         self.schedule     = []
         self.match_idx    = None
@@ -52,6 +52,11 @@ class Tournament:
     def store(self):
         with open("hansi.pickle", "wb") as f:
             pickle.dump(self, f)
+
+    def standings(self):
+        eligible_matches = [_ for _ in self.schedule]
+
+
 
 
 if __name__ == "__main__":

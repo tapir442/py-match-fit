@@ -17,6 +17,8 @@ from PyQt6.QtWidgets import \
     QListWidgetItem, QTableWidgetItem, QPushButton, QErrorMessage
 
 from Model import Tournament
+# XXX should not be needed
+from Match import Match
 from mainWindowUI import Ui_MainWindow
 from parameterUI import Ui_parameter
 from team_membersUI import Ui_Dialog as team_member_dialog
@@ -24,7 +26,7 @@ from match_dialogUI import Ui_Match_Dialog
 
 from TeamEditorUI import Ui_TeamAndScheduleEditor
 from Scheduler_Model import Scheduler
-
+import datetime
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -88,43 +90,54 @@ class Window(QMainWindow, Ui_MainWindow):
         dialog.ui.home_label.setText(mm.groupdict()["home"])
         dialog.ui.visiting_label.setText(mm.groupdict()["guest"])
         # XXX simplify
-        top = 120
-        row = 0
+        TOP = 100
+        INC = 14
+        G   = 15
+        top = TOP
         for player in self.tournament.teams[mm.groupdict()["home"]].players:
             player_data = self.tournament.teams[mm.groupdict()["home"]].players[player]
             v = "%s  %s  %s" % (player, player_data.name, player_data.surname)
             dialog.ui.home_team.addItem(v)
             button = QPushButton("+", dialog)
-            button.setGeometry (33, top, 10, 10)
-            button.clicked.connect(partial(self.click_plus, row))
-            top += 22
-            row += 1
-        top = 120
-        row = 0
+            button.setGeometry(48, top, G, G)
+            button.clicked.connect(partial(self.click_plus, player))
+            button = QPushButton("+", dialog)
+            button.setGeometry(578, top, G, G)
+            button.clicked.connect(partial(self.click_plus_guest, player))
+            top += INC
+        top = TOP
         for player in self.tournament.teams[mm.groupdict()["guest"]].players:
             player_data = self.tournament.teams[mm.groupdict()["guest"]].players[player]
             v = "%s  %s  %s" % (player, player_data.name, player_data.surname)
             dialog.ui.visiting_team.addItem(v)
             button = QPushButton("-", dialog)
-            button.setGeometry(23, top, 20, 10)
-            button.clicked.connect(partial(self.click_plus, row))
-            top += 22
-            row += 1
-
-
+            button.setGeometry(23, top, G, G)
+            button.clicked.connect(partial(self.click_minus, player))
+            button = QPushButton("-", dialog)
+            button.setGeometry(600, top, G, G)
+            button.clicked.connect(partial(self.click_minus_guest, player))
+            top += INC
+        self.running_match = Match(self.tournament.teams[mm.groupdict()["home"]],
+                                   self.tournament.teams[mm.groupdict()["guest"]])
+        self.running_match.start()
         ret = dialog.exec()
+        self.running_match.close()
+        from pprint import pprint
+        pprint(self.running_match.__dict__)
 
-    def click_plus(self, row):
-        print("plus home", row)
+    def click_plus(self, player):
+        print("plus home", player)
+        self.running_match.home_scored(player)
 
-    def click_minus(self, row):
-        print("minus home", row)
+    def click_minus(self, player):
+        print("minus home", player)
 
-    def click_plus_guest(self, row):
-        print("guest home", row)
+    def click_plus_guest(self, player):
+        self.running_match.guest_scored(player)
 
-    def click_minus_guest(self, row):
-        print("guest home", row)
+
+    def click_minus_guest(self, player):
+        print("plus gueat", player)
 
 
     def _match_selected(self, item):
@@ -151,9 +164,12 @@ class Window(QMainWindow, Ui_MainWindow):
         dialog.ui.match_duration.setValue(self.tournament.duration)
         dialog.ui.intermission.setValue(self.tournament.intermission)
         dialog.ui.tournamentName.setText(self.tournament.name)
-        # XXX: Fixme ASAP
-        _ = eval(self.tournament.start_time)
-        time = QTime(_.hour(), _.minute())
+        st = self.tournament.start_time
+        if isinstance(st, datetime.time):
+            t = QTime(st.hour, st.minute)
+        else:
+            t = eval(st)
+        time = QTime(t.hour(), t.minute())
         dialog.ui.startTime.setTime(time)
         ret = dialog.exec()
         if not ret:
@@ -233,7 +249,6 @@ class Window(QMainWindow, Ui_MainWindow):
             self.matchPlan.addItem(":".join(match))
         self.tournament.show()
         self.matchPlan.show()
-        self.matchPointer.setText(str(self.matchPlan.item(self.tournament.match_idx )))
         self.tournament.store()
 
     def _add_team(self):
@@ -317,6 +332,7 @@ class Window(QMainWindow, Ui_MainWindow):
                                   , int(self.tournament.duration)
                                   , int(self.tournament.intermission))
         self._show_schedule()
+        breakpoint()
         self.tournament.store()
 
     def _show_schedule(self):

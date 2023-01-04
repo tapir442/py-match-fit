@@ -188,7 +188,7 @@ class Match:
     >>> teamh.add_player("3", Player("Simon", "Libero"))
     >>> teamh.add_player("5", Player("Erich", "Ausputzer"))
     >>> teamg = Team("All Stars")
-    >>> teamg.add_plaxbyer("1", Player("Olli", "Schiff"))
+    >>> teamg.add_player("1", Player("Olli", "Schiff"))
     >>> teamg.add_player("2b", Player("David", "Alaber"))
     >>> teamg.add_player("3", Player("Tschuck", "Norris"))
     >>> teamg.add_player("4", Player("Hansi", "Kranki"))
@@ -243,3 +243,22 @@ class Match:
         for p in self.guest.players.values():
             s += int(str(p.goals))
         return s
+
+class Matches:
+    """
+    >>> schedule = [ ("t1", "t2")
+    ...            , ("t3", "t4")
+    ...            , ("t1", "t3")
+    ...            , ("t2", "t4")
+    ...            , ("t1", "t4")
+    ...            , ("t2", "t3")]
+    >>> pool = None
+    """
+    def __init__ (self, schedule):
+        self.matches = []
+        for _ in schedule:
+            match = Match(schedule[0], schedule[1])
+        self.matches.append(match)
+
+    def standings(self):
+        table = []

@@ -2,6 +2,7 @@ import itertools
 import datetime
 import json
 
+from Match import Match
 
 class Scheduler:
     def __init__(self, teams: list, tournament_start: str = "08:00", game_duration: int = 90,
@@ -67,6 +68,7 @@ class Scheduler:
 
         for match in itertools.combinations(teams, 2):
             i += 1
+            breakpoint()
             self.matches[i] = list(match)
             tournament_start += game_duration + break_duration
             self.match_starts.append((tournament_start.hour, tournament_start.minute))
@@ -134,8 +136,3 @@ class Scheduler:
             f"{self.match_starts[i-1][1]:02d}, " \
             f"{self.matches[i][0]} : {self.matches[i][1]}"
         return s
-
-    def store_on_disk(self):
-        data = json.dumps(self.__dict__)
-        from pprint import pprint
-        pprint(data)
