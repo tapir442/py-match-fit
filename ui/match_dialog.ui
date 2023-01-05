@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1075</width>
-    <height>717</height>
+    <width>1116</width>
+    <height>989</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -93,6 +93,26 @@
    </property>
    <property name="text">
     <string>TextLabel</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="live_table">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>530</y>
+     <width>491</width>
+     <height>361</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="scorer_list">
+   <property name="geometry">
+    <rect>
+     <x>680</x>
+     <y>530</y>
+     <width>256</width>
+     <height>361</height>
+    </rect>
    </property>
   </widget>
  </widget>

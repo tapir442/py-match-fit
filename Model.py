@@ -57,16 +57,43 @@ class Tournament:
     def add_team(self, team):
         self.teams[team] = Match.Team(team)
 
-    def store(self):
-        with open("%s.pickle" % self.name, "wb") as f:
-            pickle.dump(self, f)
-
-    def clear_schedule(self):
+    def clear_schedule(self) -> None:
         self.schedule = Scheduler([])
 
     def standings(self):
-        for s in self.schedule.matches.items():
-            print(s)
+        """
+        compute the live table
+        """
+        for _ in self.teams.values():
+            _.points = 0
+        for s in self.schedule.matches.values():
+            winner = s.winner()
+            if not winner:
+                if s.draw():
+                    s.home.points += 1
+                    s.guest.points += 1
+            else:
+                winner.points += 3
+        result = []
+        for _ in self.teams.values():
+            result.append(_)
+        u = []
+        for _ in sorted(result, key=lambda x: x.points, reverse=True):
+            u.append(f"{_.name}: {_.points}")
+        return u
+
+    def scorers(self):
+        players = []
+        for t in self.teams:
+            for p in self.teams[t].players:
+                _ = self.teams[t].players[p]
+                if _.goals.value:
+                    players.append((_, t))
+        p = sorted(players, key = lambda x: x[0].goals.value, reverse = True)
+        players = []
+        for _ in p:
+            players.append(f"{_[0].name} {_[0].surname}, ({_[1]}), {_[0].goals.value}")
+        return players
 
     def create_schedule(self, *args, **kw):
         teams = self.teams.keys()

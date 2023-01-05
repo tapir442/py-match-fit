@@ -146,6 +146,7 @@ class Team:
         self.name        = name
         self.players      = {}
         self.pool  [name] = self
+        self.points       = 0
 
     def add_player(self, number:str, player:Player) -> None:
         self.players[number] = player
@@ -177,7 +178,6 @@ class Team:
                 for playerid in self.players:
                     d["players"][playerid] = self.players[playerid].tojson()
         return json.dumps(d)
-
 
 class Match:
     """
@@ -227,6 +227,8 @@ class Match:
         return self.goals_home(), self.goals_guest()
 
     def draw(self):
+        if self.state == Match_State.waiting:
+            return None
         return self.running_score[0] == self.running_score[1]
 
     def home_wins(self):
@@ -246,6 +248,17 @@ class Match:
         for p in self.guest.players.values():
             s += int(str(p.goals))
         return s
+
+    def winner(self):
+        """
+        returns winner of a match
+        """
+        if self.state == Match_State.waiting:
+            return None
+        if self.home_wins():
+            return self.home
+        if self.guest_wins():
+            return self.guest
 
     def __str__(self):
         return f"{self.starts[0]:02d}:{self.starts[1]:02d}, ({self.home}, {self.guest})"

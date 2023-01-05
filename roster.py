@@ -86,6 +86,8 @@ class Window(QMainWindow, Ui_MainWindow):
         my_match = self.tournament.schedule.matches[self.tournament.match_idx]
         home  = my_match.home
         guest = my_match.guest
+        dialog.ui.home_label.setText(home.name)
+        dialog.ui.visiting_label.setText(guest.name)
         # XXX simplify
         TOP = 100
         INC = 14
@@ -118,32 +120,48 @@ class Window(QMainWindow, Ui_MainWindow):
         self.running_match.start()
         ret = dialog.exec()
         self.running_match.close()
+        if self.tournament.match_idx == len(self.tournament.schedule.matches):
+            self.start_match.setEnabled(False)
 
     def click_plus(self, player):
         print("plus home", player)
         self.running_match.home_scored(player)
         self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0]))
-        self.tournament.standings()
+        self.live_table()
 
     def click_minus(self, player):
         print("minus home", player)
+        return
         self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0]))
-        self.tournament.standings()
+        self.live_table()
 
     def click_plus_guest(self, player):
         print("plus gueat", player)
-        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1]))
         self.running_match.guest_scored(player)
-        self.tournament.standings()
+        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1]))
+        self.live_table()
 
     def click_minus_guest(self, player):
         print("minus guest", player)
+        return
         self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1]))
-        self.tournament.standings()
+        self.live_table()
 
     def _match_selected(self, item):
         print(self.matchPlan.currentItem().text())
         print(dir(self.matchPlan.currentItem()))
+
+    def live_table(self):
+        r = self.tournament.standings()
+        self.match_dialog.ui.live_table.clear()
+        for _ in r:
+            self.match_dialog.ui.live_table.addItem(_)
+        self.match_dialog.ui.live_table.show()
+        r = self.tournament.scorers()
+        self.match_dialog.ui.scorer_list.clear()
+        for _ in r:
+            self.match_dialog.ui.scorer_list.addItem(_)
+        self.match_dialog.ui.scorer_list.show()
 
     def setup_parameter_ui(self):
         self.parameters_dialog = dialog = QDialog(self)
