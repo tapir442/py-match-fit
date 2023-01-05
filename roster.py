@@ -88,6 +88,8 @@ class Window(QMainWindow, Ui_MainWindow):
         guest = my_match.guest
         dialog.ui.home_label.setText(home.name)
         dialog.ui.visiting_label.setText(guest.name)
+        dialog.ui.home_team.clear()
+        dialog.ui.visiting_team.clear()
         # XXX simplify
         TOP = 100
         INC = 14
