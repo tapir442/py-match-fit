@@ -263,22 +263,3 @@ class Match:
 
     def __str__(self):
         return f"{self.starts[0]:02d}:{self.starts[1]:02d}, ({self.home}, {self.guest})"
-
-class Matches:
-    """
-    >>> schedule = [ ("t1", "t2")
-    ...            , ("t3", "t4")
-    ...            , ("t1", "t3")
-    ...            , ("t2", "t4")
-    ...            , ("t1", "t4")
-    ...            , ("t2", "t3")]
-    >>> pool = None
-    """
-    def __init__ (self, schedule):
-        self.matches = []
-        for _ in schedule:
-            match = Match(schedule[0], schedule[1])
-        self.matches.append(match)
-
-    def standings(self):
-        table = []
