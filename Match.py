@@ -214,6 +214,7 @@ class Match:
 
     def start(self):
         self.state = Match_State.running
+        self.running_score = 0, 0
 
     def home_scored(self, number: str):
         self.home.scored(number)

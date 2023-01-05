@@ -90,6 +90,8 @@ class Window(QMainWindow, Ui_MainWindow):
         dialog.ui.visiting_label.setText(guest.name)
         dialog.ui.home_team.clear()
         dialog.ui.visiting_team.clear()
+        dialog.ui.home_score.display("0")
+        dialog.ui.visiting_score.display("0")
         # XXX simplify
         TOP = 100
         INC = 14
