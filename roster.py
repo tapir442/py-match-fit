@@ -118,11 +118,10 @@ class Window(QMainWindow, Ui_MainWindow):
         self.running_match.start()
         ret = dialog.exec()
         self.running_match.close()
-        from pprint import pprint
-        pprint(self.running_match.__dict__)
 
     def click_plus(self, player):
         print("plus home", player)
+        breakpoint()
         self.running_match.home_scored(player)
         self.tournament.standings()
 
