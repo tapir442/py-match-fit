@@ -5,42 +5,45 @@ import json
 from Match import Match
 
 class Scheduler:
-    def __init__(self, teams: list, tournament_start: str = "08:00", game_duration: int = 90,
+    def __init__(self, teams: list,
+                 tournament_start: str = "08:00",
+                 game_duration: int = 90,
                  break_duration: int = 1
                  ):
         """
         >>> s = Scheduler(["team1", "team2", "team3", "team4"], game_duration=10, break_duration=2)
         >>> print(s.matches[1])
-        ['team1', 'team2']
+        08:00, (team1, team2)
         >>> print(s.matches[2])
-        ['team1', 'team3']
+        08:12, (team1, team3)
         >>> print(s.matches[3])
-        ['team1', 'team4']
+        08:24, (team1, team4)
         >>> print(s.matches[4])
-        ['team2', 'team3']
+        08:36, (team2, team3)
         >>> print(s.matches[5])
-        ['team2', 'team4']
+        08:48, (team2, team4)
         >>> print(s.matches[6])
-        ['team3', 'team4']
+        09:00, (team3, team4)
         >>> print(len(s.matches))
         6
         >>> s = Scheduler(["team8", "team9"])
         >>> print(s.matches[1])
-        ['team8', 'team9']
+        08:00, (team8, team9)
         >>> print(len(s.matches))
         1
-        >>> s = Scheduler(["team1", "team2", "team3", "team4"], game_duration=13, break_duration=2)
-        >>> print(s.match_starts[0])
+        >>> s = Scheduler(["team1", "team2", "team3", "team4"], game_duration=13
+        ... , break_duration=2)
+        >>> print(s.matches[1].starts)
         (8, 0)
-        >>> print(s.match_starts[1])
+        >>> print(s.matches[2].starts)
         (8, 15)
-        >>> print(s.match_starts[2])
+        >>> print(s.matches[3].starts)
         (8, 30)
-        >>> print(s.match_starts[3])
+        >>> print(s.matches[4].starts)
         (8, 45)
-        >>> print(s.match_starts[4])
+        >>> print(s.matches[5].starts)
         (9, 0)
-        >>> print(s.match_starts[5])
+        >>> print(s.matches[6].starts)
         (9, 15)
         """
         tournament_start = datetime.datetime.strptime(tournament_start, "%H:%M")
@@ -68,71 +71,74 @@ class Scheduler:
 
         for match in itertools.combinations(teams, 2):
             i += 1
-            breakpoint()
-            self.matches[i] = list(match)
+            self.matches[i] = Match(match[0], match[1],
+                                          (tournament_start.hour, tournament_start.minute))
             tournament_start += game_duration + break_duration
-            self.match_starts.append((tournament_start.hour, tournament_start.minute))
-
-        del self.match_starts[-1]
 
     def switch_home_guest(self, i):
         """
         >>> s = Scheduler(["team1", "team2", "team3", "team4"])
         >>> s.switch_home_guest(5)
         >>> print(s.matches[1])
-        ['team1', 'team2']
+        08:00, (team1, team2)
         >>> print(s.matches[2])
-        ['team1', 'team3']
+        09:31, (team1, team3)
         >>> print(s.matches[3])
-        ['team1', 'team4']
+        11:02, (team1, team4)
         >>> print(s.matches[4])
-        ['team2', 'team3']
+        12:33, (team2, team3)
         >>> print(s.matches[5])
-        ['team4', 'team2']
+        14:04, (team4, team2)
         >>> print(s.matches[6])
-        ['team3', 'team4']
+        15:35, (team3, team4)
         """
-        self.matches[i][0], self.matches[i][1]  = self.matches[i][1], self.matches[i][0]
+        self.matches[i].home, self.matches[i].guest = \
+            self.matches[i].guest, self.matches[i].home
 
     def switch_matches(self, i, j):
         """
         >>> s = Scheduler(["team1", "team2", "team3", "team4"])
         >>> s.switch_matches(3, 5)
         >>> print(s.matches[1])
-        ['team1', 'team2']
+        08:00, (team1, team2)
         >>> print(s.matches[2])
-        ['team1', 'team3']
+        09:31, (team1, team3)
         >>> print(s.matches[3])
-        ['team2', 'team4']
+        11:02, (team2, team4)
         >>> print(s.matches[4])
-        ['team2', 'team3']
+        12:33, (team2, team3)
         >>> print(s.matches[5])
-        ['team1', 'team4']
+        14:04, (team1, team4)
         >>> print(s.matches[6])
-        ['team3', 'team4']
+        15:35, (team3, team4)
         >>> #and now a combination
         >>> s = Scheduler(["team1", "team2", "team3", "team4"])
         >>> s.switch_matches(3, 5)
         >>> s.switch_home_guest(3)
         >>> print(s.matches[1])
-        ['team1', 'team2']
+        08:00, (team1, team2)
         >>> print(s.matches[2])
-        ['team1', 'team3']
+        09:31, (team1, team3)
         >>> print(s.matches[3])
-        ['team4', 'team2']
+        11:02, (team4, team2)
         >>> print(s.matches[4])
-        ['team2', 'team3']
+        12:33, (team2, team3)
         >>> print(s.matches[5])
-        ['team1', 'team4']
+        14:04, (team1, team4)
         >>> print(s.matches[6])
-        ['team3', 'team4']
+        15:35, (team3, team4)
         """
-        h = self.matches[i]
-        self.matches[i] = self.matches[j]
-        self.matches[j] = h
+        h = (self.matches[i].home, self.matches[i].guest)
+        self.matches[i].home  = self.matches[j].home
+        self.matches[i].guest = self.matches[j].guest
+        self.matches[j].home  = h[0]
+        self.matches[j].guest = h[1]
+
 
     def print_single_match(self, i):
-        s = f"Match {i}: {self.match_starts[i-1][0]:d}:" \
-            f"{self.match_starts[i-1][1]:02d}, " \
-            f"{self.matches[i][0]} : {self.matches[i][1]}"
+        print("=====>", i)
+        breakpoint()
+        s = f"Match {i}: {self.match_starts[i][0]:d}:" \
+            f"{self.match_starts[i][1]:02d}, " \
+            f"{self.matches[i+1][0]} : {self.matches[i+1][1]}"
         return s

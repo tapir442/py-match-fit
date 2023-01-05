@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>553</width>
+    <width>699</width>
     <height>572</height>
    </rect>
   </property>
@@ -83,6 +83,62 @@
    </property>
    <property name="text">
     <string>Add Team</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="switch_matches">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>310</y>
+     <width>161</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Switch matches </string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="switch1">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>310</y>
+     <width>21</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="switch2">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>310</y>
+     <width>21</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="switch_teams">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>350</y>
+     <width>161</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Switch teams</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="switch_team_idx">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>350</y>
+     <width>21</width>
+     <height>25</height>
+    </rect>
    </property>
   </widget>
  </widget>

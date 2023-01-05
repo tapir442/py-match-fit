@@ -19,44 +19,63 @@
 #        print(locals())
 #        print("on_enter_params")
 
-
-import json
-import Match
-import pickle
 import datetime
+import pickle
+import Match
+from Scheduler_Model import Scheduler
 
 class Tournament:
     """
     Models a tournament
     """
     def __init__(self):
-        self.name         = "No Tournament given"
-        self.duration     = 14
+        self.name = ""
+        self.duration = 14
         self.intermission = 1
-        self.start_time   = datetime.time(hour=9, minute=0)
-        self.teams        = {}
-        self.schedule     = []
-        self.match_idx    = None
+        self.start_time = datetime.time(hour=9, minute=0)
+        self.teams = {}
+        self.schedule = Scheduler([])
+        self.match_idx = None
+        self.matches = {}
 
     def show(self):
         print(self.teams)
         print(self.schedule)
 
-    def add_player(self, team, number, name, surname):
-        p = Match.Player(name.title(), surname.title())
-        self.teams[team].add_player(number, p)
+    def add_player(self, team, number, name, surname) -> None:
+        """
+        Adds a player to the tournament
+        """
+        self.teams[team].add_player(number,
+                                    Match.Player(name.title(), surname.title())
+                                    )
+    def clear_teams(self):
+        self.teams = {}
+
+    def clear_players(self, team):
+        self.teams[team].players = {}
 
     def add_team(self, team):
         self.teams[team] = Match.Team(team)
 
     def store(self):
-        with open("hansi.pickle", "wb") as f:
+        with open("%s.pickle" % self.name, "wb") as f:
             pickle.dump(self, f)
 
+    def add_match(self, match_no, match):
+        self.matches[match_no] = Match.Match(match[0], match[1])
+
     def standings(self):
-        eligible_matches = [_ for _ in self.schedule]
+        for s in self.matches.items():
+            print(s)
 
-
+    def create_schedule(self, *args, **kw):
+        teams = self.teams.keys()
+        start = self.start_time
+        self.schedule = Scheduler(teams,
+                                  f"{start.hour()}:{start.minute()}",
+                                  int(self.duration),
+                                  int(self.intermission))
 
 
 if __name__ == "__main__":

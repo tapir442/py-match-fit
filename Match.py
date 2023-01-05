@@ -1,6 +1,7 @@
 import sys
 from enum import Enum, auto
 import json
+import datetime
 
 class Match_State (Enum):
     """
@@ -200,10 +201,11 @@ class Match:
     >>> match.home_wins(), match.draw(), match.guest_wins(), match.running_score
     (False, True, False, (1, 1))
     """
-    def __init__(self, home: Team, guest: Team):
+    def __init__(self, home: Team, guest: Team, starts: datetime.date):
         self.home  = home
         self.guest = guest
         self.state = Match_State.waiting
+        self.starts = starts
         self.running_score = 0, 0
 
     def close(self):
@@ -243,6 +245,9 @@ class Match:
         for p in self.guest.players.values():
             s += int(str(p.goals))
         return s
+
+    def __str__(self):
+        return f"{self.starts[0]:02d}:{self.starts[1]:02d}, ({self.home}, {self.guest})"
 
 class Matches:
     """

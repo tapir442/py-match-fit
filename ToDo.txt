@@ -1,3 +1,4 @@
+0. Parameter: 1 oder 2 Runden (default 1)
 1. Torschützenliste beim
 2. b eim Matchtop ergebnis zurüchsetzen
 3.Matchmanager: sauber leeren und zurücksetzen
