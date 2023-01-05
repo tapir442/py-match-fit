@@ -122,19 +122,23 @@ class Window(QMainWindow, Ui_MainWindow):
     def click_plus(self, player):
         print("plus home", player)
         self.running_match.home_scored(player)
+        self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0]))
         self.tournament.standings()
 
     def click_minus(self, player):
         print("minus home", player)
+        self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0]))
         self.tournament.standings()
 
     def click_plus_guest(self, player):
         print("plus gueat", player)
+        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1]))
         self.running_match.guest_scored(player)
         self.tournament.standings()
 
     def click_minus_guest(self, player):
         print("minus guest", player)
+        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1]))
         self.tournament.standings()
 
     def _match_selected(self, item):
