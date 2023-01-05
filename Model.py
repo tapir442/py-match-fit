@@ -36,7 +36,7 @@ class Tournament:
         self.teams = {}
         self.schedule = Scheduler([])
         self.match_idx = None
-        self.matches = {}
+        self.matches = self.schedule.matches
 
     def show(self):
         print(self.teams)
@@ -62,9 +62,6 @@ class Tournament:
         with open("%s.pickle" % self.name, "wb") as f:
             pickle.dump(self, f)
 
-    def add_match(self, match_no, match):
-        self.matches[match_no] = Match.Match(match[0], match[1])
-
     def standings(self):
         for s in self.matches.items():
             print(s)
@@ -76,6 +73,7 @@ class Tournament:
                                   f"{start.hour()}:{start.minute()}",
                                   int(self.duration),
                                   int(self.intermission))
+        self.matches = self.schedule.matches
 
 
 if __name__ == "__main__":

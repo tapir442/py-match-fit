@@ -2,7 +2,7 @@ import itertools
 import datetime
 import json
 
-from Match import Match
+from Match import Match, Team
 
 class Scheduler:
     def __init__(self, teams: list,
@@ -51,7 +51,6 @@ class Scheduler:
         break_duration   = datetime.timedelta(minutes=break_duration)
         self.matches = {}
         i = 0
-        self.match_starts = [(tournament_start.hour, tournament_start.minute)]
 #        i = 0
 #        n = len(teams)
 #        while i < n-1:
@@ -68,11 +67,12 @@ class Scheduler:
 #                print(teams[a], ':', teams[b])
 #                j = j+1
 #            i = i+1
-
         for match in itertools.combinations(teams, 2):
             i += 1
-            self.matches[i] = Match(match[0], match[1],
-                                          (tournament_start.hour, tournament_start.minute))
+            # Fixme! no access to team should be used
+            self.matches[i] = Match(Team.pool[match[0]],
+                                    Team.pool[match[1]],
+                                    (tournament_start.hour, tournament_start.minute))
             tournament_start += game_duration + break_duration
 
     def switch_home_guest(self, i):

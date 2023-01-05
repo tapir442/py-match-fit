@@ -193,7 +193,8 @@ class Match:
     >>> teamg.add_player("2b", Player("David", "Alaber"))
     >>> teamg.add_player("3", Player("Tschuck", "Norris"))
     >>> teamg.add_player("4", Player("Hansi", "Kranki"))
-    >>> match = Match(teamh, teamg)
+    >>> from datetime import time
+    >>> match = Match(teamh, teamg, starts=time(9, 0))
     >>> match.home_scored("3")
     >>> match.home_wins(), match.draw(), match.guest_wins(), match.running_score
     (True, False, False, (1, 0))
