@@ -67,12 +67,14 @@ class Scheduler:
 #                print(teams[a], ':', teams[b])
 #                j = j+1
 #            i = i+1
+        i = 0
         for match in itertools.combinations(teams, 2):
             i += 1
             # Fixme! no access to team should be used
             self.matches[i] = Match(Team.pool[match[0]],
                                     Team.pool[match[1]],
-                                    (tournament_start.hour, tournament_start.minute))
+                                    (tournament_start.hour,
+                                     tournament_start.minute))
             tournament_start += game_duration + break_duration
 
     def switch_home_guest(self, i):

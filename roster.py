@@ -83,7 +83,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.tournament.match_idx = 1
         else:
             self.tournament.match_idx += 1
-        my_match = self.tournament.matches[self.tournament.match_idx]
+        my_match = self.tournament.schedule.matches[self.tournament.match_idx]
         home  = my_match.home
         guest = my_match.guest
         # XXX simplify
@@ -121,7 +121,6 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def click_plus(self, player):
         print("plus home", player)
-        breakpoint()
         self.running_match.home_scored(player)
         self.tournament.standings()
 
@@ -240,7 +239,7 @@ class Window(QMainWindow, Ui_MainWindow):
         ui.setupUi(dialog)
         for team in self.tournament.teams:
             ui.team_list.addItem(team)
-        for match in self.tournament.matches.items():
+        for match in self.tournament.schedule.matches.items():
             ui.scheduleEditor.addItem(str(match))
         ui.addTeam.pressed.connect(self._add_team)
         ui.create_schedule_button.clicked.connect(self._create_schedule)
@@ -249,17 +248,11 @@ class Window(QMainWindow, Ui_MainWindow):
         ui.switch_team_idx.setInputMask("00")
         ui.switch_matches.clicked.connect(partial(self._switch_matches, ui))
         ui.switch_teams.clicked.connect(partial(self._switch_home_guest, ui))
-
         dialog.show()
         ret = dialog.exec()
         if not ret:
             ui.scheduleEditor.clear()
             return
-        for team in self._actual_team_list():
-            self.tournament.add_team(team)
-        self.tournament.schedule = []
-        for i in range(dialog.ui.scheduleEditor.count()):
-            self.tournament.schedule.append(dialog.ui.scheduleEditor.item(i).text())
         ui.scheduleEditor.clear()
         self.tournament.show()
         top = 130
@@ -270,8 +263,8 @@ class Window(QMainWindow, Ui_MainWindow):
             pb.show()
             pb.clicked.connect(partial(self._enter_members, team))
         i = 0
-        for match in self.tournament.schedule:
-            self.matchPlan.addItem(match)
+        for match in self.tournament.schedule.matches.values():
+            self.matchPlan.addItem(str(match))
         self.tournament.show()
         self.matchPlan.show()
         self.tournament.store()
@@ -365,7 +358,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def _show_schedule(self) -> None:
         ui = self.team_dialog.ui
         ui.scheduleEditor.clear()
-        for match in self.tournament.matches.values():
+        for match in self.tournament.schedule.matches.values():
             ui.scheduleEditor.addItem(str(match))
 #
 #    def about(self):
