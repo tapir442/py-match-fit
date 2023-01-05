@@ -133,12 +133,3 @@ class Scheduler:
         self.matches[i].guest = self.matches[j].guest
         self.matches[j].home  = h[0]
         self.matches[j].guest = h[1]
-
-
-    def print_single_match(self, i):
-        print("=====>", i)
-        breakpoint()
-        s = f"Match {i}: {self.match_starts[i][0]:d}:" \
-            f"{self.match_starts[i][1]:02d}, " \
-            f"{self.matches[i+1][0]} : {self.matches[i+1][1]}"
-        return s
