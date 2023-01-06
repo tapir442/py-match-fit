@@ -95,25 +95,70 @@
     <string>TextLabel</string>
    </property>
   </widget>
-  <widget class="QListWidget" name="live_table">
+  <widget class="QTableWidget" name="tabelle">
    <property name="geometry">
     <rect>
      <x>30</x>
      <y>530</y>
-     <width>491</width>
+     <width>591</width>
      <height>361</height>
     </rect>
    </property>
+   <column>
+    <property name="text">
+     <string>Team</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Goals</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Got</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Diff</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Punkte</string>
+    </property>
+   </column>
   </widget>
-  <widget class="QListWidget" name="scorer_list">
+  <widget class="QTableWidget" name="scorer">
    <property name="geometry">
     <rect>
-     <x>680</x>
+     <x>640</x>
      <y>530</y>
-     <width>256</width>
+     <width>451</width>
      <height>361</height>
     </rect>
    </property>
+   <column>
+    <property name="text">
+     <string>Nummer</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Name</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Team</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Goals</string>
+    </property>
+   </column>
   </widget>
  </widget>
  <resources/>

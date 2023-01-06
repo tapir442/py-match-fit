@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>699</width>
-    <height>572</height>
+    <width>840</width>
+    <height>780</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,15 +52,30 @@
     <string>Create Schedule</string>
    </property>
   </widget>
-  <widget class="QListWidget" name="scheduleEditor">
+  <widget class="QTableWidget" name="scheduleEditor">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>280</y>
-     <width>256</width>
-     <height>192</height>
+     <width>331</width>
+     <height>471</height>
     </rect>
    </property>
+   <column>
+    <property name="text">
+     <string>Beginn</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Heim</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Gast</string>
+    </property>
+   </column>
   </widget>
   <widget class="QLineEdit" name="team">
    <property name="geometry">
@@ -88,7 +103,7 @@
   <widget class="QPushButton" name="switch_matches">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>380</x>
      <y>310</y>
      <width>161</width>
      <height>25</height>
@@ -101,9 +116,9 @@
   <widget class="QLineEdit" name="switch1">
    <property name="geometry">
     <rect>
-     <x>500</x>
+     <x>560</x>
      <y>310</y>
-     <width>21</width>
+     <width>31</width>
      <height>25</height>
     </rect>
    </property>
@@ -111,9 +126,9 @@
   <widget class="QLineEdit" name="switch2">
    <property name="geometry">
     <rect>
-     <x>530</x>
+     <x>600</x>
      <y>310</y>
-     <width>21</width>
+     <width>31</width>
      <height>25</height>
     </rect>
    </property>
@@ -121,7 +136,7 @@
   <widget class="QPushButton" name="switch_teams">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>380</x>
      <y>350</y>
      <width>161</width>
      <height>25</height>
@@ -134,9 +149,9 @@
   <widget class="QLineEdit" name="switch_team_idx">
    <property name="geometry">
     <rect>
-     <x>500</x>
+     <x>560</x>
      <y>350</y>
-     <width>21</width>
+     <width>31</width>
      <height>25</height>
     </rect>
    </property>

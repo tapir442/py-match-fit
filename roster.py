@@ -60,7 +60,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.team_dialog.ui = Ui_TeamAndScheduleEditor()
         self.member_dialog = QDialog(self)
         self.member_dialog.ui = team_member_dialog()
-        self.matchPlan.itemClicked.connect(self._match_selected)
+#        self.matchPlan.itemClicked.connect(self._match_selected)
         self.setup_match()
         self.start_match.clicked.connect(self._start_match)
 
@@ -75,6 +75,7 @@ class Window(QMainWindow, Ui_MainWindow):
             pb.show()
             pb.clicked.connect(partial(self._enter_members, team))
         self.setup_match_plan()
+        self.show_table(self)
 
     def setup_match_plan(self) -> None:
         """
@@ -88,12 +89,43 @@ class Window(QMainWindow, Ui_MainWindow):
             mp.setItem(row, 0, w(str(match.starts)))
             mp.setItem(row, 1, w(match.home.name))
             mp.setItem(row, 2, w(match.guest.name))
-            mp.setItem(row, 3, w(str(match.running_score)))
+            mp.setItem(row, 3, w(":".join((
+                                 str(match.running_score[0].value),
+                                 str(match.running_score[1].value)))))
             row += 1
-#        from pprint
         mp.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         mp.show()
 
+    def show_table(self, widget):
+        r = self.tournament.standings()
+        widget.tabelle.clear()
+        widget.tabelle.setRowCount(len(self.tournament.teams))
+        row = 0
+        w = QTableWidgetItem
+        t = widget.tabelle.setItem
+        for _ in r:
+            t(row, 0, w(_.team))
+            t(row, 1, w(str(_.goals)))
+            t(row, 2, w(str(_.got)))
+            t(row, 3, w(str(_.goals - _.got)))
+            t(row, 4, w(str(_.points)))
+            row += 1
+        widget.tabelle.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        widget.tabelle.show()
+        r = self.tournament.scorers()
+        widget.scorer.clear()
+        widget.scorer.setRowCount(len(r))
+        row = 0
+        w = QTableWidgetItem
+        t = widget.scorer.setItem
+        for _ in r:
+            t(row, 0, w(_.number))
+            t(row, 1, w(_.name))
+            t(row, 2, w(_.team))
+            t(row, 3, w(str(_.goals)))
+            row += 1
+        widget.scorer.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        widget.scorer.show()
 
     def setup_match(self):
         self.match_dialog = dialog = QDialog(self)
@@ -120,14 +152,17 @@ class Window(QMainWindow, Ui_MainWindow):
         INC = 14
         G   = 15
         top = TOP
+        buttons = []
         for player in self.tournament.teams[home.name].players:
             player_data = self.tournament.teams[home.name].players[player]
             v = "%s  %s  %s" % (player, player_data.name, player_data.surname)
             dialog.ui.home_team.addItem(v)
             button = QPushButton("+", dialog)
+            buttons.append(button)
             button.setGeometry(48, top, G, G)
             button.clicked.connect(partial(self.click_plus, player))
             button = QPushButton("-", dialog)
+            buttons.append(button)
             button.setGeometry(23, top, G, G)
             button.clicked.connect(partial(self.click_minus, player))
             top += INC
@@ -137,9 +172,11 @@ class Window(QMainWindow, Ui_MainWindow):
             v = "%s  %s  %s" % (player, player_data.name, player_data.surname)
             dialog.ui.visiting_team.addItem(v)
             button = QPushButton("+", dialog)
+            buttons.append(button)
             button.setGeometry(578, top, G, G)
             button.clicked.connect(partial(self.click_plus_guest, player))
             button = QPushButton("-", dialog)
+            buttons.append(button)
             button.setGeometry(600, top, G, G)
             button.clicked.connect(partial(self.click_minus_guest, player))
             top += INC
@@ -150,46 +187,39 @@ class Window(QMainWindow, Ui_MainWindow):
         if self.tournament.match_idx == len(self.tournament.schedule.matches):
             self.start_match.setEnabled(False)
         self.setup_match_plan()
+        for b in buttons:
+            b.deleteLater()
+        self.show_table(self)
 
     def click_plus(self, player):
-        print("plus home", player)
         self.running_match.home_scored(player)
-        self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0]))
+        self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0].value))
         self.live_table()
 
     def click_minus(self, player):
-        print("minus home", player)
-        return
-        self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0]))
+        self.running_match.home_cancelled(player)
+        self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0].value))
         self.live_table()
 
     def click_plus_guest(self, player):
-        print("plus gueat", player)
         self.running_match.guest_scored(player)
-        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1]))
+        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1].value))
         self.live_table()
 
     def click_minus_guest(self, player):
-        print("minus guest", player)
-        return
-        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1]))
+        self.running_match.guest_cancelled(player)
+        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1].value))
         self.live_table()
 
-    def _match_selected(self, item):
-        print(self.matchPlan.currentItem().text())
-        print(dir(self.matchPlan.currentItem()))
+#    def _match_selected(self, item):
+#        print(self.matchPlan.currentItem().text())
+#        print(dir(self.matchPlan.currentItem()))
 
     def live_table(self):
-        r = self.tournament.standings()
-        self.match_dialog.ui.live_table.clear()
-        for _ in r:
-            self.match_dialog.ui.live_table.addItem(_)
-        self.match_dialog.ui.live_table.show()
-        r = self.tournament.scorers()
-        self.match_dialog.ui.scorer_list.clear()
-        for _ in r:
-            self.match_dialog.ui.scorer_list.addItem(_)
-        self.match_dialog.ui.scorer_list.show()
+        """
+        displays the live table
+        """
+        self.show_table(self.match_dialog.ui)
 
     def setup_parameter_ui(self):
         self.parameters_dialog = dialog = QDialog(self)
@@ -289,8 +319,7 @@ class Window(QMainWindow, Ui_MainWindow):
         ui.setupUi(dialog)
         for team in self.tournament.teams:
             ui.team_list.addItem(team)
-        for match in self.tournament.schedule.matches.items():
-            ui.scheduleEditor.addItem(str(match))
+        self._show_schedule()
         ui.addTeam.pressed.connect(self._add_team)
         ui.create_schedule_button.clicked.connect(self._create_schedule)
         ui.switch1.setInputMask("00")
@@ -312,9 +341,7 @@ class Window(QMainWindow, Ui_MainWindow):
             top += 22
             pb.show()
             pb.clicked.connect(partial(self._enter_members, team))
-        i = 0
-        for match in self.tournament.schedule.matches.values():
-            self.matchPlan.addItem(str(match))
+        self.setup_match_plan()
         self.tournament.show()
         self.matchPlan.show()
         self.tournament.store()
@@ -407,19 +434,21 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def _show_schedule(self) -> None:
         ui = self.team_dialog.ui
-        ui.scheduleEditor.clear()
+        mp = ui.scheduleEditor
+        mp.setRowCount(len(self.tournament.schedule.matches))
+        row = 0
+        w   = QTableWidgetItem
         for match in self.tournament.schedule.matches.values():
-            ui.scheduleEditor.addItem(str(match))
-#
-#    def about(self):
-#        QMessageBox.about(
-#            self,
-#            "Tournament Director - Schedule Editor",
-#            "<p>A sample text editor app built with:</p>"
-#            "<p>- PyQt</p>"
-#            "<p>- Qt Designer</p>"
-#            "<p>- Python</p>",
-#        )
+            mp.setItem(row, 0, w(str(match.starts)))
+            mp.setItem(row, 1, w(match.home.name))
+            mp.setItem(row, 2, w(match.guest.name))
+            mp.setItem(row, 3, w(":".join((
+                                 str(match.running_score[0].value),
+                                 str(match.running_score[1].value)))))
+            row += 1
+        mp.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        mp.show()
+
 
 def main_GUI():
     roster = QApplication(sys.argv)

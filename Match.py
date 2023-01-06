@@ -2,6 +2,7 @@ import sys
 from enum import Enum, auto
 import json
 import datetime
+import functools
 
 class Match_State (Enum):
     """
@@ -16,7 +17,7 @@ class CustomEncoder(json.JSONEncoder):
             return o.tojson()
         return json.JSONEncoder.default(self, o)
 
-
+@functools.total_ordering
 class Bounded_Counter:
     def __init__(self, lower=0, upper=sys.maxsize, step=1):
         self.lower = lower
@@ -35,6 +36,12 @@ class Bounded_Counter:
 
     def tojson(self):
         return json.dumps(self.__dict__, indent=4, cls=CustomEncoder)
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __lt__(self, other):
+        return self.value < other.value
 
 
 class Player:
@@ -82,6 +89,9 @@ class Player:
 
     def scored(self):
         self.goals.increment()
+
+    def cancelled(self):
+        self.goals.decrement()
 
     def goal_was_cancelled(self):
         self.goals.decrement()
@@ -160,6 +170,9 @@ class Team:
     def scored(self, number: str) -> None:
         self.players[number].scored()
 
+    def cancelled(self, number: str) -> None:
+        self.players[number].cancelled()
+
     def __hash__(self):
         return hash(self.name)
 
@@ -207,22 +220,30 @@ class Match:
         self.guest = guest
         self.state = Match_State.waiting
         self.starts = starts
-        self.running_score = 0, 0
+        self.running_score = Bounded_Counter(), Bounded_Counter()
 
     def close(self):
         self.state = Match_State.finished
 
     def start(self):
         self.state = Match_State.running
-        self.running_score = 0, 0
+        self.running_score = [Bounded_Counter(), Bounded_Counter()]
 
     def home_scored(self, number: str):
         self.home.scored(number)
-        self.running_score = self.score()
+        self.running_score[0].increment()
 
     def guest_scored(self, number: str):
         self.guest.scored(number)
-        self.running_score = self.score()
+        self.running_score[1].increment()
+
+    def home_cancelled(self, number: str):
+        self.home.cancelled(number)
+        self.running_score[0].decrement()
+
+    def guest_cancelled(self, number: str):
+        self.guest.cancelled(number)
+        self.running_score[1].decrement()
 
     def score(self):
         return self.goals_home(), self.goals_guest()
