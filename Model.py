@@ -92,8 +92,33 @@ class Tournament:
         for _ in self.teams.values():
             result.append(_)
         u = []
-        # XXX : what to do
-        for _ in sorted(result, key=lambda x: x.points or x.diff, reverse=True):
+        from pprint import pprint
+        def _cmp(s, o):
+            if s.points < o.points:
+                return -1
+            if s.points > o.points:
+                return 1
+            w = None
+            for match in self.schedule.matches.values():
+                if match.home.name == s.name and match.guest.name == o.name:
+                    w = match.winner()
+                elif match.guest.name == s.name and match.home.name == o.name:
+                    w = match.winner()
+                else:
+                    continue
+            if w is not None:
+                if w == o.name:
+                    return -1
+                if w == s.name:
+                    return 1
+
+            if s.diff < o.diff:
+                return -1
+            if s.diff > o.diff:
+                return 1
+            return 0
+        import functools
+        for _ in sorted(result, key=functools.cmp_to_key(_cmp), reverse=True):
             u.append(team_result(team=_.name, goals = _.goals, got = _.got, points = _.points))
         return u
 

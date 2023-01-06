@@ -285,6 +285,7 @@ class Match:
             return self.home
         if self.guest_wins():
             return self.guest
+        return ""
 
     def __str__(self):
         return f"{self.starts[0]:02d}:{self.starts[1]:02d}, ({self.home}, {self.guest})"
