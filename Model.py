@@ -72,6 +72,7 @@ class Tournament:
             _.points = 0
             _.goals  = 0
             _.got    = 0
+            _.diff   = 0
 
         for s in self.schedule.matches.values():
             winner = s.winner()
@@ -83,13 +84,16 @@ class Tournament:
                 winner.points += 3
             s.home.goals  += s.running_score[0].value
             s.home.got    += s.running_score[1].value
+            s.home.diff   = s.home.goals - s.home.got
             s.guest.got   += s.running_score[0].value
             s.guest.goals += s.running_score[1].value
+            s.guest.diff   = s.guest.goals - s.guest.got
         result = []
         for _ in self.teams.values():
             result.append(_)
         u = []
-        for _ in sorted(result, key=lambda x: x.points, reverse=True):
+        # XXX : what to do
+        for _ in sorted(result, key=lambda x: x.points or x.diff, reverse=True):
             u.append(team_result(team=_.name, goals = _.goals, got = _.got, points = _.points))
         return u
 
