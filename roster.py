@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import \
     QListWidgetItem, QTableWidgetItem, QPushButton, QErrorMessage, \
     QAbstractItemView, QTableWidget
 
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QColor
 
 
 from Model import Tournament
@@ -48,7 +48,7 @@ class Window(QMainWindow, Ui_MainWindow):
         else:
             self.teams_and_schedule.setEnabled(True)
 
-        self.finish_tournament.setEnabled(True)
+        self.finish_tournament.setEnabled(False)
 
         self.setup_main_window()
 
@@ -65,6 +65,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.start_match.clicked.connect(self._start_match)
 
     def setup_main_window(self):
+        self.finish_tournament.clicked.connect(self._ciao)
         self.setWindowTitle(self.tournament.name)
         p = self.logoLabel.setPixmap(QPixmap("1980.jpeg"))
         top = 130
@@ -76,6 +77,10 @@ class Window(QMainWindow, Ui_MainWindow):
             pb.clicked.connect(partial(self._enter_members, team))
         self.setup_match_plan()
         self.show_table(self)
+
+    def _ciao(self):
+        self.tournament.store()
+        sys.exit(0)
 
     def setup_match_plan(self) -> None:
         """
@@ -94,6 +99,17 @@ class Window(QMainWindow, Ui_MainWindow):
                                  str(match.running_score[1].value)))))
             row += 1
         mp.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        if self.tournament.match_idx is not None:
+            i = self.tournament.match_idx
+        else:
+            i = 0
+        if i < len(self.tournament.schedule.matches):
+            for j in range(self.matchPlan.columnCount()):
+                self.matchPlan.item(i, j).setBackground(
+                    QColor(125,125,125))
+        if self.tournament.match_idx == len(self.tournament.schedule.matches):
+            self.start_match.setEnabled(False)
+            self.finish_tournament.setEnabled(True)
         mp.show()
 
     def show_table(self, widget):
@@ -184,8 +200,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.running_match.start()
         ret = dialog.exec()
         self.running_match.close()
-        if self.tournament.match_idx == len(self.tournament.schedule.matches):
-            self.start_match.setEnabled(False)
         self.setup_match_plan()
         for b in buttons:
             b.deleteLater()

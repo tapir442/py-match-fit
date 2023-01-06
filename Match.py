@@ -220,7 +220,7 @@ class Match:
         self.guest = guest
         self.state = Match_State.waiting
         self.starts = starts
-        self.running_score = Bounded_Counter(), Bounded_Counter()
+        self.running_score = [Bounded_Counter(), Bounded_Counter()]
 
     def close(self):
         self.state = Match_State.finished
@@ -238,12 +238,16 @@ class Match:
         self.running_score[1].increment()
 
     def home_cancelled(self, number: str):
+        v = self.home.players[number].goals.value
         self.home.cancelled(number)
-        self.running_score[0].decrement()
+        if v != self.home.players[number].goals.value:
+            self.running_score[0].decrement()
 
     def guest_cancelled(self, number: str):
+        v = self.guest.players[number].goals.value
         self.guest.cancelled(number)
-        self.running_score[1].decrement()
+        if v != self.guest.players[number].goals.value:
+            self.running_score[1].decrement()
 
     def score(self):
         return self.goals_home(), self.goals_guest()

@@ -160,17 +160,17 @@
     </column>
     <column>
      <property name="text">
-      <string>Diff</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
       <string>Goals</string>
      </property>
     </column>
     <column>
      <property name="text">
       <string>Got</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Diff</string>
      </property>
     </column>
     <column>
