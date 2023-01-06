@@ -14,9 +14,11 @@ from PyQt6.QtWidgets import \
     QMainWindow, \
     QApplication, \
     QDialog, \
-    QListWidgetItem, QTableWidgetItem, QPushButton, QErrorMessage
+    QListWidgetItem, QTableWidgetItem, QPushButton, QErrorMessage, \
+    QAbstractItemView, QTableWidget
 
-from PyQt6.QtGui import QIntValidator
+from PyQt6.QtGui import QPixmap
+
 
 from Model import Tournament
 # XXX should not be needed
@@ -63,6 +65,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.start_match.clicked.connect(self._start_match)
 
     def setup_main_window(self):
+        self.setWindowTitle(self.tournament.name)
+        p = self.logoLabel.setPixmap(QPixmap("1980.jpeg"))
         top = 130
         for team in self.tournament.teams:
             pb = QPushButton(team, self.centralwidget)
@@ -70,6 +74,25 @@ class Window(QMainWindow, Ui_MainWindow):
             top += 22
             pb.show()
             pb.clicked.connect(partial(self._enter_members, team))
+        self.setup_match_plan()
+
+    def setup_match_plan(self) -> None:
+        """
+        Fills table with the match data
+        """
+        mp = self.matchPlan
+        mp.setRowCount(len(self.tournament.schedule.matches))
+        row = 0
+        w   = QTableWidgetItem
+        for match in self.tournament.schedule.matches.values():
+            mp.setItem(row, 0, w(str(match.starts)))
+            mp.setItem(row, 1, w(match.home.name))
+            mp.setItem(row, 2, w(match.guest.name))
+            mp.setItem(row, 3, w(str(match.running_score)))
+            row += 1
+#        from pprint
+        mp.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        mp.show()
 
 
     def setup_match(self):
@@ -126,6 +149,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.running_match.close()
         if self.tournament.match_idx == len(self.tournament.schedule.matches):
             self.start_match.setEnabled(False)
+        self.setup_match_plan()
 
     def click_plus(self, player):
         print("plus home", player)
