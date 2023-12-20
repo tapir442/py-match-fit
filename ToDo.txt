@@ -5,10 +5,8 @@
 4. Torschützenliste: Nummer anzeigen
 5. doppelte matches
 6. Korrekturfunktion ??
-7. Eigentore
 8. Strafverifizierung
 9. ergebnisse anzeigen
-10. ET
 11. Kader während Spiel einblenden
 
 MeinTurnierplan.de

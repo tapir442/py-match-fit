@@ -1,3 +1,6 @@
+"""
+Scheduler
+"""
 import sys
 from pprint import pprint
 import random
@@ -34,7 +37,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.break_between_matches.setValidator(QIntValidator(0, 15))
         self.break_between_matches.setText("1")
         self.match_duration.setValidator(QIntValidator(1, 90))
-        self.match_duration.setText("14")
+        self.match_duration.setText("12")
 
         self.switch_matches.clicked.connect(self._switch_matches)
         self.switch_team_order.clicked.connect(self._switch_home_guest)
@@ -115,7 +118,7 @@ class FindReplaceDialog(QDialog):
         loadUi("ui/Scheduler.ui", self)
 
 
- if __name__ == "__main__":
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Window()
     win.show()

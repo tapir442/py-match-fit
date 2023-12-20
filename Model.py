@@ -1,27 +1,9 @@
-#from enum import Enum, auto
-
-#from statemachine import StateMachine, State
-
-#class Tournament_Machine(StateMachine):
-#    tabula_rasa    = State("tabula_rasa", initial=True)
-#    params         = State("params")
-#    parameters_set = State("parameters_set")
-#    teams_set      = State("teams_set")
-#    scheduled      = State("scheduled")
-#    match_ready    = State("match_ready")
-#    match_running  = State("match_running")
-#    match_finished = State("match_finished")
-#    finished       = State("finished")
-
-#    enter_params   = tabula_rasa.to(params)
-
-#    def on_enter_params(self, disable=None, enable=None, *args, **kw):
-#        print(locals())
-#        print("on_enter_params")
-
+""" Model.py """
 import datetime
+import functools
 import pickle
 from collections import namedtuple
+
 import Match
 from Scheduler_Model import Scheduler
 
@@ -34,18 +16,18 @@ class Tournament:
     """
     def __init__(self):
         self.name = ""
-        self.duration = 14
-        self.intermission = 1
+        self.duration = 10
+        self.intermission = 2
         self.start_time = datetime.time(hour=9, minute=0)
         self.teams = {}
-        self.schedule = Scheduler([])
         self.match_idx = None
+        self.clear_schedule()
 
     def show(self):
         print(self.teams)
         print(self.schedule)
 
-    def add_player(self, team, number, name, surname) -> None:
+    def add_player(self, team:str, number:str, name:str, surname:str) -> None:
         """
         Adds a player to the tournament
         """
@@ -92,7 +74,7 @@ class Tournament:
         for _ in self.teams.values():
             result.append(_)
         u = []
-        from pprint import pprint
+
         def _cmp(s, o):
             if s.points < o.points:
                 return -1
@@ -117,7 +99,6 @@ class Tournament:
             if s.diff > o.diff:
                 return 1
             return 0
-        import functools
         for _ in sorted(result, key=functools.cmp_to_key(_cmp), reverse=True):
             u.append(team_result(team=_.name, goals = _.goals, got = _.got, points = _.points))
         return u

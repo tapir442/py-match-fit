@@ -1,36 +1,26 @@
 """
+Main program
 """
 
-import sys
-from functools import partial
-import argparse
+import datetime
 import pickle
-
-import PyQt6
+import sys
+from functools import partial, wraps
 
 from PyQt6.QtCore import Qt, QTime
+from PyQt6.QtGui import QColor, QPixmap
+from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QDialog,
+                             QErrorMessage, QListWidgetItem, QMainWindow,
+                             QPushButton, QTableWidget, QTableWidgetItem)
 
-from PyQt6.QtWidgets import \
-    QMainWindow, \
-    QApplication, \
-    QDialog, \
-    QListWidgetItem, QTableWidgetItem, QPushButton, QErrorMessage, \
-    QAbstractItemView, QTableWidget
-
-from PyQt6.QtGui import QPixmap, QColor
-
-
-from Model import Tournament
-# XXX should not be needed
-from Match import Match
 from mainWindowUI import Ui_MainWindow
+# XXX should not be needed
+from match_dialogUI import Ui_Match_Dialog
+from Model import Tournament
 from parameterUI import Ui_parameter
 from team_membersUI import Ui_Dialog as team_member_dialog
-from match_dialogUI import Ui_Match_Dialog
-
 from TeamEditorUI import Ui_TeamAndScheduleEditor
 
-import datetime
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -163,6 +153,11 @@ class Window(QMainWindow, Ui_MainWindow):
         dialog.ui.visiting_team.clear()
         dialog.ui.home_score.display("0")
         dialog.ui.visiting_score.display("0")
+        dialog.ui.add_og_home.clicked.connect(self.click_plus_og_home)
+        dialog.ui.minus_og_home.clicked.connect(self.click_minus_og_home)
+        dialog.ui.add_og_guest.clicked.connect(self.click_plus_og_guest)
+        dialog.ui.minus_og_guest.clicked.connect(self.click_minus_og_guest)
+
         # XXX simplify
         TOP = 100
         INC = 14
@@ -205,6 +200,7 @@ class Window(QMainWindow, Ui_MainWindow):
             b.deleteLater()
         self.show_table(self)
 
+    # XXX Code duplication
     def click_plus(self, player):
         self.running_match.home_scored(player)
         self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0].value))
@@ -224,6 +220,28 @@ class Window(QMainWindow, Ui_MainWindow):
         self.running_match.guest_cancelled(player)
         self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1].value))
         self.live_table()
+
+    def click_plus_og_home(self):
+        self.running_match.og_home()
+        self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0].value))
+        self.live_table()
+
+    def click_minus_og_home(self):
+        self.running_match.og_cancel_home()
+        self.match_dialog.ui.home_score.display(str(self.running_match.running_score[0].value))
+        self.live_table()
+
+    def click_plus_og_guest(self):
+        self.running_match.og_guest()
+        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1].value))
+        self.live_table()
+
+    def click_minus_og_guest(self):
+        self.running_match.og_cancel_guest()
+        self.match_dialog.ui.visiting_score.display(str(self.running_match.running_score[1].value))
+        self.live_table()
+
+
 
 #    def _match_selected(self, item):
 #        print(self.matchPlan.currentItem().text())
@@ -274,7 +292,7 @@ class Window(QMainWindow, Ui_MainWindow):
             return
         t.duration     = ui.match_duration.value()
         t.intermission = ui.intermission.value()
-        t.name         = ui.tournamentName.text()
+        t.name         = ui.tournamentName.text().strip()
         t.start_time   = ui.startTime.time()
         t.store()
         self.setWindowTitle(t.name)
@@ -336,6 +354,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self._show_schedule()
         ui.addTeam.pressed.connect(self._add_team)
         ui.create_schedule_button.clicked.connect(self._create_schedule)
+        ui.meinturnierplan.clicked.connect(self._meinturnierplan)
         ui.switch1.setInputMask("00")
         ui.switch2.setInputMask("00")
         ui.switch_team_idx.setInputMask("00")
@@ -432,16 +451,33 @@ class Window(QMainWindow, Ui_MainWindow):
         return [str(ui.team_list.item(i).text())
                 for i in range(ui.team_list.count())]
 #
-    def _create_schedule(self):
-        """
-        creates a simple schedule for the tournament
-        """
+    def _prepare_schedule(self):
         ui = self.team_dialog.ui
         self.tournament.clear_teams()
         ui.scheduleEditor.clear()
         for team in self._actual_team_list():
             self.tournament.add_team(team)
         self.tournament.create_schedule()
+
+
+    def _create_schedule(self):
+        """
+        creates a simple schedule for the tournament
+        """
+        self._prepare_schedule()
+        self.tournament.store()
+        self._show_schedule()
+
+    def _meinturnierplan(self):
+        """Create a schedule like myturnierplan.de"""
+        self._prepare_schedule()
+        # Only working for 6 teams!!!
+        switchlist = [4, 14, 6, 6, 11, 9, 14, 14, 15, 15, 12, 13, 13]
+        for i, v in enumerate(switchlist):
+            self.tournament.schedule.switch_matches(i+1, v)
+        teamswitches = [4, 6, 10, 11, 13, 14]
+        for i in teamswitches:
+            self.tournament.schedule.switch_home_guest(i)
         self.tournament.store()
         self._show_schedule()
 

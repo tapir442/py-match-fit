@@ -1,3 +1,6 @@
+"""
+Match data containers
+"""
 import sys
 from enum import Enum, auto
 import json
@@ -19,16 +22,16 @@ class CustomEncoder(json.JSONEncoder):
 
 @functools.total_ordering
 class Bounded_Counter:
-    def __init__(self, lower=0, upper=sys.maxsize, step=1):
+    def __init__(self, lower:int=0, upper:int=sys.maxsize, step:int=1):
         self.lower = lower
         self.upper = upper
         self.value = lower
         self.step  = step
 
-    def increment(self, step=0):
+    def increment(self, step:int=0):
         self.value = min(self.upper, self.value + (self.step if not step else step))
 
-    def decrement(self, step=0):
+    def decrement(self, step:int=0):
         self.value = max(self.lower, self.value - (self.step if not step else step))
 
     def __str__(self):
@@ -153,10 +156,11 @@ class Team:
     pool = {}
 
     def __init__(self, name: str):
-        self.name        = name
-        self.players      = {}
+        self.name = name
+        self.players = {}
         self.pool  [name] = self
-        self.points       = 0
+        self.points = 0
+        self.og = 0
 
     def add_player(self, number:str, player:Player) -> None:
         self.players[number] = player
@@ -169,6 +173,14 @@ class Team:
 
     def scored(self, number: str) -> None:
         self.players[number].scored()
+
+    def scored_og(self) -> None:
+        self.og += 1
+
+    def cancelled_og(self, running_score):
+        if self.og > 0:
+            self.og -= 1
+            running_score.decrement()
 
     def cancelled(self, number: str) -> None:
         self.players[number].cancelled()
@@ -190,6 +202,8 @@ class Team:
                 d["players"] = {}
                 for playerid in self.players:
                     d["players"][playerid] = self.players[playerid].tojson()
+            if k == "og":
+                d["og"] = self.og.tojson()
         return json.dumps(d)
 
 class Match:
@@ -249,6 +263,20 @@ class Match:
         if v != self.guest.players[number].goals.value:
             self.running_score[1].decrement()
 
+    def og_home(self):
+        self.home.scored_og()
+        self.running_score[0].increment()
+
+    def og_guest(self):
+        self.guest.scored_og()
+        self.running_score[1].increment()
+
+    def og_cancel_home(self):
+        self.home.cancelled_og(self.running_score[0])
+
+    def og_cancel_guest(self):
+        self.guest.cancelled_og(self.running_score[1])
+
     def score(self):
         return self.goals_home(), self.goals_guest()
 
@@ -263,17 +291,15 @@ class Match:
     def guest_wins(self):
         return self.running_score[0] < self.running_score[1]
 
+    @staticmethod
+    def _goals(o):
+        return o.og + [int(str(p.goals)) for p in o.players.values()]
+
     def goals_home(self):
-        s = 0
-        for p in self.home.players.values():
-            s += int(str(p.goals))
-        return s
+        return self._goals(self.home)
 
     def goals_guest(self):
-        s = 0
-        for p in self.guest.players.values():
-            s += int(str(p.goals))
-        return s
+        return self._goals(self.guest)
 
     def winner(self):
         """

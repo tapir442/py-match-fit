@@ -1,10 +1,14 @@
+""" Scheduler """
+
 import itertools
 import datetime
-import json
 
 from Match import Match, Team
 
 class Scheduler:
+    """
+    Scheduler implementation
+    """
     def __init__(self, teams: list,
                  tournament_start: str = "08:00",
                  game_duration: int = 90,
@@ -77,7 +81,7 @@ class Scheduler:
                                      tournament_start.minute))
             tournament_start += game_duration + break_duration
 
-    def switch_home_guest(self, i):
+    def switch_home_guest(self, i:int) -> None:
         """
         >>> s = Scheduler(["team1", "team2", "team3", "team4"])
         >>> s.switch_home_guest(5)
@@ -97,7 +101,7 @@ class Scheduler:
         self.matches[i].home, self.matches[i].guest = \
             self.matches[i].guest, self.matches[i].home
 
-    def switch_matches(self, i, j):
+    def switch_matches(self, i:int, j:int) -> None:
         """
         >>> s = Scheduler(["team1", "team2", "team3", "team4"])
         >>> s.switch_matches(3, 5)
@@ -130,8 +134,6 @@ class Scheduler:
         >>> print(s.matches[6])
         15:35, (team3, team4)
         """
-        h = (self.matches[i].home, self.matches[i].guest)
-        self.matches[i].home  = self.matches[j].home
-        self.matches[i].guest = self.matches[j].guest
-        self.matches[j].home  = h[0]
-        self.matches[j].guest = h[1]
+        # XXX: assure that both matches are in the future
+        self.matches[i].home, self.matches[i].guest, self.matches[j].home, self.matches[j].guest =\
+            self.matches[j].home, self.matches[j].guest, self.matches[i].home, self.matches[i].guest

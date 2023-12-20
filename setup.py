@@ -25,7 +25,6 @@ setup(
         'Intended Audience :: Football Tournament directors',
         'Topic :: Helper'
         ],
-    keywords="Tournament sports"
-#    package_dir={'delierium': 'delierium'},
-    project_urls={'Source': 'https://github.com/tapir442/py-match-fit.git"}
+    keywords="Tournament sports",
+    project_urls={'Source': 'https://github.com/tapir442/py-match-fit.git'}
 )
