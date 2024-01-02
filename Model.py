@@ -64,11 +64,11 @@ class Tournament:
                     s.guest.points += 1
             else:
                 winner.points += 3
-            s.home.goals  += s.running_score[0].value
-            s.home.got    += s.running_score[1].value
+            s.home.goals  += s.running_score[s.HOME].value
+            s.home.got    += s.running_score[s.GUEST].value
             s.home.diff   = s.home.goals - s.home.got
-            s.guest.got   += s.running_score[0].value
-            s.guest.goals += s.running_score[1].value
+            s.guest.got   += s.running_score[s.HOME].value
+            s.guest.goals += s.running_score[s.GUEST].value
             s.guest.diff   = s.guest.goals - s.guest.got
         result = []
         for _ in self.teams.values():
@@ -132,7 +132,3 @@ class Tournament:
     def store(self):
         with open("%s.pickle" % self.name, "wb") as f:
             pickle.dump(self, f)
-
-if __name__ == "__main__":
-    t = Tournament_Machine()
-    t.enter_params()

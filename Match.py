@@ -229,6 +229,8 @@ class Match:
     >>> match.home_wins(), match.draw(), match.guest_wins(), match.running_score
     (False, True, False, (1, 1))
     """
+    HOME=0
+    GUEST=1
     def __init__(self, home: Team, guest: Team, starts: datetime.date):
         self.home  = home
         self.guest = guest
@@ -245,37 +247,37 @@ class Match:
 
     def home_scored(self, number: str):
         self.home.scored(number)
-        self.running_score[0].increment()
+        self.running_score[self.HOME].increment()
 
     def guest_scored(self, number: str):
         self.guest.scored(number)
-        self.running_score[1].increment()
+        self.running_score[self.GUEST].increment()
 
     def home_cancelled(self, number: str):
         v = self.home.players[number].goals.value
         self.home.cancelled(number)
         if v != self.home.players[number].goals.value:
-            self.running_score[0].decrement()
+            self.running_score[self.HOME].decrement()
 
     def guest_cancelled(self, number: str):
         v = self.guest.players[number].goals.value
         self.guest.cancelled(number)
         if v != self.guest.players[number].goals.value:
-            self.running_score[1].decrement()
+            self.running_score[self.GUEST].decrement()
 
     def og_home(self):
         self.home.scored_og()
-        self.running_score[0].increment()
+        self.running_score[self.HOME].increment()
 
     def og_guest(self):
         self.guest.scored_og()
-        self.running_score[1].increment()
+        self.running_score[self.GUEST].increment()
 
     def og_cancel_home(self):
-        self.home.cancelled_og(self.running_score[0])
+        self.home.cancelled_og(self.running_score[self.HOME])
 
     def og_cancel_guest(self):
-        self.guest.cancelled_og(self.running_score[1])
+        self.guest.cancelled_og(self.running_score[self.GUEST])
 
     def score(self):
         return self.goals_home(), self.goals_guest()
@@ -283,13 +285,13 @@ class Match:
     def draw(self):
         if self.state == Match_State.waiting:
             return None
-        return self.running_score[0] == self.running_score[1]
+        return self.running_score[self.HOME] == self.running_score[self.GUEST]
 
     def home_wins(self):
-        return self.running_score[0] > self.running_score[1]
+        return self.running_score[self.HOME] > self.running_score[self.GUEST]
 
     def guest_wins(self):
-        return self.running_score[0] < self.running_score[1]
+        return self.running_score[self.HOME] < self.running_score[self.GUEST]
 
     @staticmethod
     def _goals(o):
@@ -314,4 +316,4 @@ class Match:
         return ""
 
     def __str__(self):
-        return f"{self.starts[0]:02d}:{self.starts[1]:02d}, ({self.home}, {self.guest})"
+        return f"{self.starts[self.HOME]:02d}:{self.starts[self.GUEST]:02d}, ({self.home}, {self.guest})"
