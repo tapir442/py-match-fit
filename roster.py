@@ -81,7 +81,7 @@ class Window(QMainWindow, Ui_MainWindow):
         row = 0
         w   = QTableWidgetItem
         for match in self.tournament.schedule.matches.values():
-            mp.setItem(row, 0, w(str(match.starts)))
+            mp.setItem(row, 0, w(f"{match.starts[0]:02d}:{match.starts[1]:02d}"))
             mp.setItem(row, 1, w(match.home.name))
             mp.setItem(row, 2, w(match.guest.name))
             mp.setItem(row, 3, w(":".join((
@@ -104,7 +104,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def show_table(self, widget):
         r = self.tournament.standings()
-        widget.tabelle.clear()
+#        widget.tabelle.clear()
         widget.tabelle.setRowCount(len(self.tournament.teams))
         row = 0
         w = QTableWidgetItem
